@@ -10,3 +10,12 @@ Budgery is a self-hosted financial application for setting budgets, tracking exp
  * Easy reconciliation by keeping a time-based running total of accounts.
  * Zero-based budgeting - every dollar has a job and a label.
  * Imports from various systems (Bank CSV, OFX).
+
+## Running
+
+Budgery uses [hypercorn](https://gitlab.com/pgjones/hypercorn) and 
+[quart](https://gitlab.com/pgjones/quart). You can run a server with:
+
+```
+hypercorn budgery:app -b 192.168.1.1:10100
+```
