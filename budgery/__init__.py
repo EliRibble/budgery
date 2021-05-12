@@ -1,7 +1,20 @@
-from quart import Quart, render_template
+import os
+from quart import Quart
 
-app = Quart("budgery")
+import budgery.config
+import budgery.routes
 
-@app.route("/")
-async def hello() -> None:
-	return await render_template("index.html")
+def create_app(mode="Development") -> Quart:
+	"Create the quart app."
+	app = Quart("budgery")
+	app.config.from_object(f"budgery.config.{mode}")
+	if os.environ.get("BUDGERY_SETTINGS"):
+		app.config.from_envvar('BUDGERY_SETTINGS')
+	app.register_blueprint(
+		budgery.routes.blueprint
+	)
+	return app
+
+if __name__ == "__main__":
+	app = create_app()
+	app.run(port=10100)
