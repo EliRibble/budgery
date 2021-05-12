@@ -4,6 +4,7 @@ from quart import Quart
 import sys
 
 import budgery.config
+import budgery.middleware
 import budgery.routes
 
 def create_app() -> Quart:
@@ -15,6 +16,7 @@ def create_app() -> Quart:
 	app.register_blueprint(
 		budgery.routes.blueprint
 	)
+	app.asgi_app = budgery.middleware.ReverseProxied(app.asgi_app)
 	return app
 
 def main() -> None:
