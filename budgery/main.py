@@ -26,14 +26,7 @@ oauth.register(
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
 	user_ = request.session.get("user")
-	import pprint
-	pprint.pprint(user_)
 	return templates.TemplateResponse("index.html.jinja", {"request": request, "user": user_})
-
-@app.route("/login")
-async def login(request: Request):
-	redirect_uri = request.url_for("auth")
-	return await oauth.keycloak.authorize_redirect(request, redirect_uri)
 
 @app.route("/auth")
 async def auth(request: Request):
@@ -44,3 +37,13 @@ async def auth(request: Request):
 	user = await oauth.keycloak.parse_id_token(request, token)
 	request.session["user"] = dict(user)
 	return RedirectResponse(url="/")
+
+@app.route("/login")
+async def login(request: Request):
+	redirect_uri = request.url_for("auth")
+	return await oauth.keycloak.authorize_redirect(request, redirect_uri)
+
+@app.route("/user")
+async def user(request: Request):
+	user_ = request.session.get("user")
+	return templates.TemplateResponse("user.html.jinja", {"request": request, "user": user_})

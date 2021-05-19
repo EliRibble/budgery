@@ -1,0 +1,21 @@
+{% extends "base.html.jinja" %}
+{% block content %}
+<table>
+	<thead>
+		<tr>
+			<th>Property</th>
+			<th>Value</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>Auth Time</td><td>{{ user.auth_time }}</td></tr>
+		<tr><td>Email</td><td>{{ user.email }}</td></tr>
+		<tr><td>Exp</td><td>{{ user.exp }}</td></tr>
+		<tr><td>Family Name</td><td>{{ user.family_name }}</td></tr>
+		<tr><td>Given Name</td><td>{{ user.given_name }}</td></tr>
+		<tr><td>Name</td><td>{{ user.name }}</td></tr>
+		<tr><td>Preferred Username</td><td>{{ user.preferred_username }}</td></tr>
+		<tr><td>Data</td><td><pre>{{ user|pprint }}</pre></td></tr>
+	</tbody>
+</table>
+{% endblock %}
