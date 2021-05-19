@@ -1,11 +1,9 @@
-<html>
-<head>
-	<title>Budgery</title>
-</head>
+{% extends "base.html.jinja" %}
+{% block content %}
 <p>Welcome to Budgery</p>
 <p>
 {% for name, url in sso_logins %}
 	<a href="{{url}}">{{ name }}</a>
 {% endfor %}
 </p>
-</html>
+{% endblock %}

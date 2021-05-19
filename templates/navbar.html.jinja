@@ -2,7 +2,11 @@
 	<div class="nav-wrapper">
 		<a href="#" class="brand-logo">Budgery</a>
 		<ul id="nav-mobile" class="right hide-on-med-and-down">
-			<li><a href="sass.html">Login</a></li>
+			{% if user %}
+				<li><a href="sass.html">{{ user.username }}</a></li>
+			{% else %}
+				<li><a href="/login">Login</a></li>
+			{% endif %}
 		</ul>
 	</div>
 </nav>
