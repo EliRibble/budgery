@@ -1,9 +1,15 @@
+<!-- Dropdown structure -->
+<ul id="user-dropdown" class="dropdown-content">
+	<li><a href="/user">Info</a></li>
+	<li class="divider"></li>
+	<li><a href="/logout">Logout</a></li>
+</ul>
 <nav>
 	<div class="nav-wrapper">
 		<a href="#" class="brand-logo">Budgery</a>
 		<ul id="nav-mobile" class="right hide-on-med-and-down">
 			{% if user %}
-				<li><a href="/user">{{ user.name }}</a></li>
+				<li><a class="dropdown-trigger" href="#!" data-target="user-dropdown">{{ user.name }}</a></li>
 			{% else %}
 				<li><a href="/login">Login</a></li>
 			{% endif %}

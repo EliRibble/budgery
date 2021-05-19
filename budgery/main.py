@@ -43,6 +43,11 @@ async def login(request: Request):
 	redirect_uri = request.url_for("auth")
 	return await oauth.keycloak.authorize_redirect(request, redirect_uri)
 
+@app.route("/logout")
+async def logout(request: Request):
+	request.session.pop("user", None)
+	return RedirectResponse(url="/")
+
 @app.route("/user")
 async def user(request: Request):
 	user_ = request.session.get("user")
