@@ -1,0 +1,21 @@
+{% extends "base.html.jinja" %}
+{% block content %}
+<table>
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Amount</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for txn in transactions %}
+			<tr><td>{{ txn.id }}</td><td>{{ txn.amount }}</td></tr>
+		{% endfor %}
+	</tbody>
+</table>
+<form action="/transaction" method="GET">
+	<input type="text" name="amount"></input>
+	<label for="amount">Amount</label>
+	<input type="submit"></input>
+</form>
+{% endblock %}

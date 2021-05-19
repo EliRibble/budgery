@@ -1,16 +1,22 @@
 from authlib.integrations.starlette_client import OAuth, OAuthError
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
 from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 
 from budgery import user
+from budgery.db import connection as db_connection
+from budgery.db import crud
 
 app = FastAPI()
 config = Config("env")
+db_engine = db_connection.connect(config)
+crud.create_tables(db_engine)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
 oauth = OAuth(config)
@@ -23,8 +29,16 @@ oauth.register(
 		"scope": "openid email profile"
 	}
 )
+
+def get_db():
+	db = db_connection.session(db_engine)
+	try:
+		yield db
+	finally:
+		db.close()
+
 @app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
+async def root(request: Request, db: Session = Depends(get_db)):
 	user_ = request.session.get("user")
 	return templates.TemplateResponse("index.html.jinja", {"request": request, "user": user_})
 
@@ -47,6 +61,17 @@ async def login(request: Request):
 async def logout(request: Request):
 	request.session.pop("user", None)
 	return RedirectResponse(url="/")
+
+@app.get("/transaction")
+async def transaction_post(amount: float, request: Request, db: Session = Depends(get_db)):
+	crud.transaction_create(db, amount)
+	return RedirectResponse(url="/transactions")
+
+@app.get("/transactions", response_class=HTMLResponse)
+async def transaction_get(request: Request, db: Session = Depends(get_db)):
+	user_ = request.session.get("user")
+	transactions = crud.transaction_list(db)
+	return templates.TemplateResponse("transactions.html.jinja", {"request": request, "transactions": transactions, "user": user_})
 
 @app.route("/user")
 async def user(request: Request):
