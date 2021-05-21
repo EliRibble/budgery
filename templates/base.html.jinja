@@ -12,7 +12,10 @@
 	{% endblock %}
 </head>
 <body>
-	<header></header>
+	<header>
+		{% block header %}
+		{% endblock %}
+	</header>
 	<main>
 		{% include "navbar.html.jinja" %}
 		<div class="container">

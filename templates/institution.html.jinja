@@ -1,6 +1,20 @@
 {% extends "base.html.jinja" %}
+{% block header %}
+<nav class="top-nav blue">
+	<div class="container">
+		<div class="nav-wrapper">
+			<div class="col s12">
+				<a href="/institution" class="breadcrumb">Institution</a>
+				<a href="/institution/create" class="breadcrumb">Create</a>
+			</div>
+		</div>
+	</div>
+</nav>
+{% endblock %}
+
 {% block content %}
-{% if accounts %}
+<p>Institutions are the various companies or organizations that hold your assets and liabilities on your behalf</p>
+{% if institutions %}
 	<table>
 		<thead>
 			<tr>
@@ -15,6 +29,6 @@
 		</tbody>
 	</table>
 {% else %}
-	<p>No accounts yet, please <a href="/accounts/create">create one</a></p>
+	<p>No institutions yet, please <a href="/institution/create">create one</a></p>
 {% endif %}
 {% endblock %}

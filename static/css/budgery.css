@@ -8,6 +8,21 @@ header, main, footer {
 	}
 }
 
+nav.top-nav {
+	height: 110px;
+	box-shadow: none;
+	border-bottom: 1px solid rgba(0,0,0,0.14);
+	background-color: transparent;
+}
+
+nav .breadcrumb {
+	font-size: 30px;
+}
+
+nav .nav-wrapper {
+	padding-top: 40px;
+}
+
 .logo-container {
 	text-align:center;
 }
