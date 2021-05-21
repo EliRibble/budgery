@@ -1,15 +1,10 @@
 {% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/institution", "Institution"),
+	("/institution/create", "Create"),
+] %}
 {% block header %}
-<nav class="top-nav blue">
-	<div class="container">
-		<div class="nav-wrapper">
-			<div class="col s12">
-				<a href="/institution" class="breadcrumb">Institution</a>
-				<a href="/institution/create" class="breadcrumb">Create</a>
-			</div>
-		</div>
-	</div>
-</nav>
+{% include "fragments/breadcrumb.html.jinja" %}
 {% endblock %}
 
 {% block content %}

@@ -1,0 +1,11 @@
+<nav class="top-nav blue">
+	<div class="container">
+		<div class="nav-wrapper">
+			<div class="col s12">
+				{% for target, label in breadcrumbs %}
+					<a href="{{target}}" class="breadcrumb">{{label}}</a>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+</nav>
