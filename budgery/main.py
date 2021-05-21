@@ -104,6 +104,14 @@ async def institution(request: Request):
 		"request": request,
 		"user": user_})
 
+@app.get("/institution/create")
+async def institution_create(request: Request):
+	user_ = request.session.get("user")
+	return templates.TemplateResponse("institution-create.html.jinja", {
+		"current_page": "institution",
+		"request": request,
+		"user": user_})
+
 @app.get("/report")
 async def report(request: Request):
 	user_ = request.session.get("user")

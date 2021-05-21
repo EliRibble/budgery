@@ -1,0 +1,44 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/institution", "Institutions"),
+	("/institution/create", "Create"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block content %}
+<p>Create an institution which holds some of your assets or liabilities.</p>
+<div class="row">
+	<form class="col s12" action="/institution/create" method="POST">
+		<ul class="collection with-header">
+			<li class="collection-header blue lighten-4"><h1>Required</h1>
+			<li class="collection-item">
+				<div class="row">
+					<div class="input-field col s6">
+						<i class="material-icons prefix">assignment</i>
+						<input placeholder="Bank of the Internet" id="name" type="text" class="validate">
+						<label for="name">Name</label>
+					</div>
+				</div>
+			</li>
+		</ul>
+		<ul class="collection with-header">
+			<li class="collection-header blue lighten-4"><h1>Optional</h1></li>
+			<li class="collection-item">
+				<div class="row">
+					<div class="input-field col s6">
+						<i class="material-icons prefix">assignment</i>
+						<input placeholder="1234567" id="aba-routing-number" type="text">
+						<label for="aba-routing-number">ABA Routing Number</label>
+					</div>
+				</div>
+			</li>
+		</ul>
+		<button class="btn waves-effect waves-light" type="submit" name="action">Submit
+			<i class="material-icons right">send</i>
+		</button>
+	</form>
+</div>
+
+{% endblock %}

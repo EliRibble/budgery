@@ -8,6 +8,21 @@ header, main, footer {
 	}
 }
 
+li.collection-header h1 {
+	font-size: 1.5rem;
+	margin: 0;
+	line-height: 1rem;
+}
+
+.logo-container {
+	text-align:center;
+}
+.logo-container h1 {
+	font-size: 3.0rem;
+	margin: 1rem;
+	margin-block-start: 0;
+}
+
 nav.top-nav {
 	height: 110px;
 	box-shadow: none;
@@ -21,13 +36,4 @@ nav .breadcrumb {
 
 nav .nav-wrapper {
 	padding-top: 40px;
-}
-
-.logo-container {
-	text-align:center;
-}
-.logo-container h1 {
-	font-size: 3.0rem;
-	margin: 1rem;
-	margin-block-start: 0;
 }
