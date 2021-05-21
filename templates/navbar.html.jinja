@@ -1,20 +1,19 @@
-<!-- Dropdown structure -->
-<ul id="user-dropdown" class="dropdown-content">
-	<li><a href="/user">Info</a></li>
-	<li class="divider"></li>
-	<li><a href="/logout">Logout</a></li>
-</ul>
-<nav>
-	<div class="nav-wrapper">
-		<a href="/" class="brand-logo">Budgery</a>
-		
-		<ul id="nav-mobile" class="right hide-on-med-and-down">
-			<li><a href="/transactions">Transactions</a></li>
-			{% if user %}
-				<li><a class="dropdown-trigger" href="#!" data-target="user-dropdown">{{ user.name }}</a></li>
-			{% else %}
-				<li><a href="/login">Login</a></li>
-			{% endif %}
-		</ul>
+<ul class="sidenav sidenav-fixed">
+	<div class="logo-container">
+		<li class="logo"><img src="/static/img/budgery-logo.png"></img></li>
+		<h1>Budgery</h1>
 	</div>
-</nav>
+	<li><a href="/account"><i class="material-icons">account_balance_wallet</i>Accounts</a></li>
+	<li><a href="/allocation"><i class="material-icons">donut_small</i>Allocations</a></li>
+	<li><a href="/category"><i class="material-icons">category</i>Categories</a></li>
+	<li><a href="/institution"><i class="material-icons">account_balance</i>Institutions</a></li>
+	<li><a href="/report"><i class="material-icons">assessment</i>Reports</a></li>
+	<li><a href="/tag"><i class="material-icons">tag</i>Tags</a></li>
+	<li><a href="/transaction"><i class="material-icons">iso</i>Transactions</a></li>
+	{% if user %}
+		<li><a href="/user"><i class="material-icons">account_box</i>{{ user.name }}</a></li>
+	{% else %}
+		<li><a href="/login"><i class="material-icons">lock</i>Login</a></li>
+	{% endif %}
+</ul>
+

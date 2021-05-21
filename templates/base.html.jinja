@@ -3,23 +3,33 @@
 <head>
 	{% block head %}
 	<title>Budgery</title>
+	<link rel="shortcut icon" type="image/ico" href="/static/ico/budgery.ico">
 	<link href="/static/css/material-icons.css" rel="stylesheet">
+	<link href="/static/css/budgery.css" rel="stylesheet">
 	<link rel="stylesheet" href="/static/materialize/css/materialize.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 	{% endblock %}
 </head>
 <body>
-	{% include "navbar.html.jinja" %}
-	{% block content %}
-	{% endblock %}
+	<header></header>
+	<main>
+		{% include "navbar.html.jinja" %}
+		<div class="container">
+			{% block content %}
+			{% endblock %}
+		</div>
+	</main>
 	<script src="/static/materialize/js/materialize.min.js"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
+			var dropdowns = document.querySelectorAll(".dropdown-trigger");
+			var instances = M.Dropdown.init(dropdowns, {});
+
+			var sidenavs = document.querySelectorAll('.sidenav');
+			instances = M.Sidenav.init(sidenavs, {});
 			{% block onready %}
 			{% endblock %}
-			var elems = document.querySelectorAll(".dropdown-trigger");
-			var instances = M.Dropdown.init(elems, {});
 		});
 	</script>
 </body>
