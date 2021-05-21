@@ -1,19 +1,26 @@
+{% macro navelement(name, target, icon, label) -%}
+	<li {% if current_page == name %}class="active"{% endif %}>
+		<a href="{{target}}">
+		<i class="material-icons">{{icon}}</i>{{label}}</a>
+	</li>
+{%- endmacro %}
+
 <ul class="sidenav sidenav-fixed">
 	<div class="logo-container">
 		<li class="logo"><img src="/static/img/budgery-logo.png"></img></li>
 		<h1>Budgery</h1>
 	</div>
-	<li><a href="/account"><i class="material-icons">account_balance_wallet</i>Accounts</a></li>
-	<li><a href="/allocation"><i class="material-icons">donut_small</i>Allocations</a></li>
-	<li><a href="/category"><i class="material-icons">category</i>Categories</a></li>
-	<li><a href="/institution"><i class="material-icons">account_balance</i>Institutions</a></li>
-	<li><a href="/report"><i class="material-icons">assessment</i>Reports</a></li>
-	<li><a href="/tag"><i class="material-icons">tag</i>Tags</a></li>
-	<li><a href="/transaction"><i class="material-icons">iso</i>Transactions</a></li>
+	{{ navelement("account", "/account", "account_balance_wallet", "Accounts") }}
+	{{ navelement("allocation", "/allocation", "donut_small", "Allocations") }}
+	{{ navelement("category", "/category", "category", "Categories") }}
+	{{ navelement("institution", "/institution", "account_balance", "Institutions") }}
+	{{ navelement("report", "/report", "assessment", "Reports") }}
+	{{ navelement("tag", "/tag", "tag", "Tags") }}
+	{{ navelement("transaction", "/transaction", "iso", "Transactions") }}
 	{% if user %}
-		<li><a href="/user"><i class="material-icons">account_box</i>{{ user.name }}</a></li>
+		{{ navelement("user", "/user", "account_box", user.name) }}
 	{% else %}
-		<li><a href="/login"><i class="material-icons">lock</i>Login</a></li>
+		{{ navelement("login", "/login", "lock", Login) }}
 	{% endif %}
 </ul>
 
