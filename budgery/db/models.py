@@ -11,22 +11,19 @@ class Transaction(Base):
 	amount = Column(Float)
 
 class User(Base):
-	__tablename__ = "users"
+	__tablename__ = "user"
 
 	id = Column(Integer, primary_key=True, index=True)
-	email = Column(String, unique=True, index=True)
-	hashed_password = Column(String)
-	is_active = Column(Boolean, default=True)
-
-	items = relationship("Item", back_populates="owner")
+	email = Column(String)
+	username = Column(String, index=True)
+	accounts = relationship("Account", back_populates="owner")
 
 
-class Item(Base):
-	__tablename__ = "items"
+class Account(Base):
+	__tablename__ = "account"
 
 	id = Column(Integer, primary_key=True, index=True)
-	title = Column(String, index=True)
-	description = Column(String, index=True)
-	owner_id = Column(Integer, ForeignKey("users.id"))
+	name = Column(String)
+	owner_id = Column(Integer, ForeignKey("user.id"))
 
-	owner = relationship("User", back_populates="items")
+	owner = relationship("User", back_populates="accounts")

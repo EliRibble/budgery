@@ -1,3 +1,5 @@
+from typing import Mapping, Union
+
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
@@ -8,9 +10,9 @@ from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 
-from budgery import user
 from budgery.db import connection as db_connection
 from budgery.db import crud
+from budgery.user import User
 
 app = FastAPI()
 config = Config("env")
@@ -36,6 +38,23 @@ def get_db():
 		yield db
 	finally:
 		db.close()
+
+def get_user(request: Request) -> User:
+	user_data = request.session.get("user")
+	return _parse_user(user_data)
+
+def _parse_user(user_data: Mapping[str, Union[int, str]]) -> User:
+	user_model = User(
+		auth_time = user_data["auth_time"],
+		disabled = False,
+		email = user_data["email"],
+		email_verified = user_data["email_verified"],
+		expiration = user_data["exp"],
+		family_name = user_data["family_name"],
+		given_name = user_data["given_name"],
+		name = user_data["name"],
+		username = user_data["preferred_username"],)	
+	return user_model
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request, db: Session = Depends(get_db)):
@@ -68,14 +87,16 @@ async def accounts_create_post(request: Request, name: str = Form(...)):
 	user_ = request.session.get("user")
 	return templates.TemplateResponse("accounts-create.html.jinja", {"request": request, "user": user_})
 
-@app.route("/auth")
-async def auth(request: Request):
+@app.get("/auth", response_class=HTMLResponse)
+async def auth(request: Request, db: Session = Depends(get_db)):
 	try:
 		token = await oauth.keycloak.authorize_access_token(request)
 	except OAuthError as error:
 		return HTMLResponse(f"<h1>{error.error}</h1>")
-	user = await oauth.keycloak.parse_id_token(request, token)
-	request.session["user"] = dict(user)
+	user_ = await oauth.keycloak.parse_id_token(request, token)
+	user_model = _parse_user(user_)
+	crud.user_ensure_exists(db, user_model)
+	request.session["user"] = dict(user_)
 	return RedirectResponse(url="/")
 
 @app.get("/category")
@@ -143,10 +164,13 @@ async def transaction_get(request: Request, db: Session = Depends(get_db)):
 		"transactions": transactions,
 		"user": user_})
 
-@app.route("/user")
-async def user(request: Request):
-	user_ = request.session.get("user")
+@app.get("/user")
+async def user_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+	user_data = request.session.get("user")
+	db_user = crud.user_get_by_username(db, user.username)
 	return templates.TemplateResponse("user.html.jinja", {
 		"current_page": "user",
+		"db_user": db_user,
 		"request": request,
-		"user": user_})
+		"user": user,
+		"user_data": user_data,})

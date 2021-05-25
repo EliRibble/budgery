@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 
 from budgery.db import models
 from budgery.db import schemas
+from budgery.user import User
+
 
 def create_tables(db: Session):
 	models.Base.metadata.create_all(bind=db)
@@ -14,10 +16,6 @@ def transaction_create(db: Session, amount: int):
 
 def transaction_list(db: Session):
 	return db.query(models.Transaction).all()
-
-def get_user(db: Session, user_id: int):
-	return db.query(models.User).filter(models.User.id == user_id).first()
-
 
 def get_user_by_email(db: Session, email: str):
 	return db.query(models.User).filter(models.User.email == email).first()
@@ -46,3 +44,19 @@ def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
 	db.commit()
 	db.refresh(db_item)
 	return db_item
+
+def user_ensure_exists(db: Session, user: User) -> None:
+	existing = user_get_by_username(db, user.username)
+	if existing:
+		return
+	user = models.User(
+		email = user.email,
+		username = user.username,
+	)
+	db.add(user)
+	db.commit()
+
+def user_get_by_username(db: Session, username: str):
+	return db.query(models.User).filter(models.User.username == username).first()
+
+
