@@ -1,20 +1,48 @@
 {% extends "base.html.jinja" %}
 {% block content %}
-{% if accounts %}
-	<table>
-		<thead>
-			<tr>
-				<th>ID</th>
-				<th>Amount</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for txn in transactions %}
-				<tr><td>{{ txn.id }}</td><td>{{ txn.amount }}</td></tr>
-			{% endfor %}
-		</tbody>
-	</table>
+{% if not account %}
+	<p>Sorry, an account with that ID does not exist or you don't have access to it.</p>
 {% else %}
-	<p>No accounts yet, please <a href="/account/create">create one</a></p>
+<a href="/account/{{ account.id }}/edit">Edit</a>
+<table>
+	<thead>
+		<tr>
+			<th>Property</th>
+			<th>Value</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>ID</td><td>{{ account.id }}</td></tr>
+		<tr><td>Name</td><td>{{ account.name }}</td></tr>
+		<tr><td>Institution</td><td>{{ account.institution.name }}</td></tr>
+		<tr><td>Version</td><td>{{ account.version }}</td></tr>
+	</tbody>
+</table>
+<table>
+	<thead>
+		<tr>
+			<th>Version</th>
+			<th>When</th>
+			<th>Name</th>
+			<th>Institution</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>0</td>
+			<td>{{ account.created }}</td>
+			<td></td>
+			<td></td>
+		</tr>
+		{% for entry in history %}
+		<tr>
+			<td>{{ entry.version }}</td>
+			<td>{{ entry.changed }}</td>
+			<td>{{ entry.name }}</td>
+			<td>{{ entry.institution_id }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
 {% endif %}
 {% endblock %}

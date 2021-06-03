@@ -1,0 +1,35 @@
+{% extends "base.html.jinja" %}
+{% block onready %}
+var element = document.getElementById("institution");
+M.Autocomplete.init(element, {
+	data: {
+		{% for institution in institutions %}
+			"{{ institution.name }}": null,
+		{% endfor %}
+	}
+});
+{% endblock %}
+{% block content %}
+<div class="row">
+	<form class="col s12" action="/account/{{ account.id }}/edit" method="POST">
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">assignment</i>
+				<input placeholder="Savings" name="name" type="text" value="{{ account.name }}">
+				<label for="name">Name</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">account_balance</i>
+				<input placeholder="Bank of the Internet" id="institution" name="institution_name" type="text" class="autocomplete" value="{{ account.institution.name }}">
+				<a class="btn-floating disabled"><i class="material-icons">add</i></a>
+				<label for="name">Institution</label>
+			</div>
+		</div>
+		<button class="btn waves-effect waves-light" type="submit">Submit
+			<i class="material-icons right">send</i>
+		</button>
+	</form>
+</div>
+{% endblock %}

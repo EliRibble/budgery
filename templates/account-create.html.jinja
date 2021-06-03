@@ -3,33 +3,37 @@
 var element = document.getElementById("institution");
 M.Autocomplete.init(element, {
 	data: {
-		"Apple": null,
-		"Microsoft": null,
+		{% for institution in institutions %}
+			"{{ institution.name }}": null,
+		{% endfor %}
 	}
 });
 {% endblock %}
 {% block content %}
+{% if not institutions %}
+	<p>This system does not have any institutions yet. You can't create an account without one. Please create one <a href="/institution/create">here</a></p>.
+{% else %}
 <div class="row">
-	<form class="col s12" action="/accounts/create" method="POST">
+	<form class="col s12" action="/account/create" method="POST">
 		<div class="row">
 			<div class="input-field col s6">
 				<i class="material-icons prefix">assignment</i>
-				<input placeholder="Savings" id="name" type="text" class="validate">
+				<input placeholder="Savings" name="name" type="text" class="validate">
 				<label for="name">Name</label>
 			</div>
 		</div>
 		<div class="row">
 			<div class="input-field col s6">
 				<i class="material-icons prefix">account_balance</i>
-				<input placeholder="Bank of the Internet" id="institution" type="text" class="autocomplete">
+				<input placeholder="Bank of the Internet" id="institution" name="institution_name" type="text" class="autocomplete">
 				<a class="btn-floating disabled"><i class="material-icons">add</i></a>
 				<label for="name">Institution</label>
 			</div>
 		</div>
-		<button class="btn waves-effect waves-light" type="submit" name="action">Submit
+		<button class="btn waves-effect waves-light" type="submit">Submit
 			<i class="material-icons right">send</i>
 		</button>
 	</form>
 </div>
-
+{% endif %}
 {% endblock %}

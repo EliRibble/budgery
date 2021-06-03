@@ -61,13 +61,73 @@ async def root(request: Request, db: Session = Depends(get_db)):
 	user_ = request.session.get("user")
 	return templates.TemplateResponse("index.html.jinja", {"request": request, "user": user_})
 
-@app.route("/account")
-async def accounts(request: Request):
+@app.get("/account")
+async def account_list_get(request: Request, db: Session = Depends(get_db)):
 	user_ = request.session.get("user")
+	institutions = crud.institution_list(db)
+	accounts = crud.account_list(db)
+	return templates.TemplateResponse("account-list.html.jinja", {
+		"accounts": accounts,
+		"current_page": "account",
+		"institutions": institutions,
+		"request": request,
+		"user": user_})
+
+@app.get("/account/create")
+async def accounts_create_get(request: Request, db: Session = Depends(get_db)):
+	user_ = request.session.get("user")
+	institutions = crud.institution_list(db)
+	return templates.TemplateResponse("account-create.html.jinja", {
+		"institutions": institutions,
+		"request": request,
+		 "user": user_
+	})
+
+@app.post("/account/create")
+async def accounts_create_post(request: Request, db: Session = Depends(get_db), name: str = Form(...), institution_name: str = Form(...)):
+	user_ = request.session.get("user")
+	institution = crud.institution_get_by_name(db, institution_name)
+	crud.account_create(
+		db = db,
+		institution_id = institution.id,
+		name = name,
+		user = user_,
+	)
+	return RedirectResponse(status_code=303, url="/account")
+
+@app.get("/account/{account_id}")
+async def account_get(request: Request, account_id: int, db: Session = Depends(get_db)):
+	user_ = request.session.get("user")
+	account = crud.account_get_by_id(db, account_id)
+	history = crud.account_history_list_by_account_id(db, account_id)
 	return templates.TemplateResponse("account.html.jinja", {
+		"account": account,
+		"current_page": "account",
+		"history": history,
+		"request": request,
+		"user": user_})
+
+@app.get("/account/{account_id}/edit")
+async def account_edit_get(request: Request, account_id: int, db: Session = Depends(get_db)):
+	user_ = request.session.get("user")
+	account = crud.account_get_by_id(db, account_id)
+	return templates.TemplateResponse("account-edit.html.jinja", {
+		"account": account,
 		"current_page": "account",
 		"request": request,
 		"user": user_})
+
+@app.post("/account/{account_id}/edit")
+async def account_edit_post(request: Request, account_id: int, name: str = Form(...), institution_name: str = Form(...), db: Session = Depends(get_db)):
+	user_ = request.session.get("user")
+	account = crud.account_get_by_id(db, account_id)
+	institution = crud.institution_get_by_name(db, institution_name)
+	crud.account_update(db,
+		account=account,
+		institution=institution,
+		name=name,
+	)
+	return RedirectResponse(status_code=303, url=f"/account/{account.id}")
 
 @app.route("/allocation")
 async def allocation(request: Request):
@@ -76,16 +136,6 @@ async def allocation(request: Request):
 		"current_page": "allocation",
 		"request": request,
 		"user": user_})
-
-@app.get("/account/create")
-async def accounts_create_get(request: Request):
-	user_ = request.session.get("user")
-	return templates.TemplateResponse("accounts-create.html.jinja", {"request": request, "user": user_})
-
-@app.post("/accounts/create")
-async def accounts_create_post(request: Request, name: str = Form(...)):
-	user_ = request.session.get("user")
-	return templates.TemplateResponse("accounts-create.html.jinja", {"request": request, "user": user_})
 
 @app.get("/auth", response_class=HTMLResponse)
 async def auth(request: Request, db: Session = Depends(get_db)):

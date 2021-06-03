@@ -1,4 +1,5 @@
 import logging
+from typing import Iterable
 
 from sqlalchemy.orm import Session
 
@@ -9,8 +10,33 @@ from budgery.user import User
 
 LOGGER = logging.getLogger(__name__)
 
+def account_create(db: Session, institution_id: int, name: str, user: User) -> models.Account:
+	account = models.Account(
+		institution_id = institution_id,
+		name = name,
+	)
+	db.add(account)
+	db.commit()
+
+def account_get_by_id(db: Session, account_id: int) -> models.Account:
+	return db.query(models.Account).filter_by(id=account_id).first()
+
+def account_history_list_by_account_id(db: Session, account_id: int) -> Iterable[models.AccountHistory]:
+	return db.query(models.AccountHistory).all()
+
+def account_list(db: Session):
+	return db.query(models.Account).all()
+
+def account_update(db: Session, account: int, institution: int, name: str) -> None:
+	account.name = name
+	account.institution = institution
+	db.commit()
+	
 def create_tables(db: Session):
 	models.Base.metadata.create_all(bind=db)
+
+def institution_get_by_name(db: Session, name: str) -> models.Institution:
+	return db.query(models.Institution).filter(name==name).first()
 
 def institution_list(db: Session):
 	return db.query(models.Institution).all()

@@ -1,0 +1,23 @@
+{% extends "base.html.jinja" %}
+{% block content %}
+{% if accounts %}
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for account in accounts %}
+				<tr>
+					<td>{{ account.id }}</td>
+					<td><a href="/account/{{ account.id }}">{{ account.name }}</a></td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% else %}
+	<p>No accounts yet, please <a href="/account/create">create one</a></p>
+{% endif %}
+{% endblock %}
