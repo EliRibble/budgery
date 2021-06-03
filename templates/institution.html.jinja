@@ -13,12 +13,17 @@
 		<thead>
 			<tr>
 				<th>ID</th>
-				<th>Amount</th>
+				<th>Name</th>
+				<th>ABA Routing Number</th>
 			</tr>
 		</thead>
 		<tbody>
-			{% for txn in transactions %}
-				<tr><td>{{ txn.id }}</td><td>{{ txn.amount }}</td></tr>
+			{% for institution in institutions %}
+				<tr>
+					<td>{{ institution.id }}</td>
+					<td>{{ institution.name }}</td>
+					<td>{{ institution.aba_routing_number }}</td>
+				</tr>
 			{% endfor %}
 		</tbody>
 	</table>

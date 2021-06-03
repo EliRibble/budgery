@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.orm import Session
 
 from budgery.db import models
@@ -5,8 +7,23 @@ from budgery.db import schemas
 from budgery.user import User
 
 
+LOGGER = logging.getLogger(__name__)
+
 def create_tables(db: Session):
 	models.Base.metadata.create_all(bind=db)
+
+def institution_list(db: Session):
+	return db.query(models.Institution).all()
+
+def institution_create(db: Session, user: User, aba_routing_number: int, name: str) -> models.Institution:
+	institution = models.Institution(
+		aba_routing_number=aba_routing_number,
+		name=name,
+	)
+	db.add(institution)
+	db.commit()
+	LOGGER.info("Created %s", institution)
+	return institution
 
 def transaction_create(db: Session, amount: int):
 	transaction = models.Transaction(amount=amount)
@@ -58,5 +75,3 @@ def user_ensure_exists(db: Session, user: User) -> None:
 
 def user_get_by_username(db: Session, username: str):
 	return db.query(models.User).filter(models.User.username == username).first()
-
-

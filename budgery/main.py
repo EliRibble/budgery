@@ -118,20 +118,33 @@ async def logout(request: Request):
 	return RedirectResponse(url="/")
 
 @app.get("/institution")
-async def institution(request: Request):
+async def institution_get(request: Request, db: Session = Depends(get_db)):
 	user_ = request.session.get("user")
+	institutions = crud.institution_list(db)
 	return templates.TemplateResponse("institution.html.jinja", {
 		"current_page": "institution",
+		"institutions": institutions,
 		"request": request,
 		"user": user_})
 
 @app.get("/institution/create")
-async def institution_create(request: Request):
+async def institution_create_get(request: Request):
 	user_ = request.session.get("user")
 	return templates.TemplateResponse("institution-create.html.jinja", {
 		"current_page": "institution",
 		"request": request,
 		"user": user_})
+
+@app.post("/institution/create")
+async def institution_create_post(request: Request, db: Session = Depends(get_db), aba_routing_number: int = Form(...), name: str = Form(...)):
+	user_ = request.session.get("user")
+	crud.institution_create(
+		aba_routing_number=aba_routing_number,
+		db=db,
+		name=name,
+		user=user_,
+	)
+	return RedirectResponse(status_code=303, url="/institution")
 
 @app.get("/report")
 async def report(request: Request):

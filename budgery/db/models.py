@@ -4,6 +4,21 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+class Account(Base):
+	__tablename__ = "account"
+
+	id = Column(Integer, primary_key=True, index=True)
+	name = Column(String)
+	owner_id = Column(Integer, ForeignKey("user.id"))
+
+	owner = relationship("User", back_populates="accounts")
+
+class Institution(Base):
+	__tablename__ = "institution"
+	id = Column(Integer, primary_key=True, index=True)
+	name = Column(String)
+	aba_routing_number = Column(Integer)
+
 class Transaction(Base):
 	__tablename__ = "transaction"
 
@@ -19,11 +34,3 @@ class User(Base):
 	accounts = relationship("Account", back_populates="owner")
 
 
-class Account(Base):
-	__tablename__ = "account"
-
-	id = Column(Integer, primary_key=True, index=True)
-	name = Column(String)
-	owner_id = Column(Integer, ForeignKey("user.id"))
-
-	owner = relationship("User", back_populates="accounts")
