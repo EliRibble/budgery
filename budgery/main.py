@@ -77,7 +77,7 @@ async def allocation(request: Request):
 		"request": request,
 		"user": user_})
 
-@app.get("/accounts/create")
+@app.get("/account/create")
 async def accounts_create_get(request: Request):
 	user_ = request.session.get("user")
 	return templates.TemplateResponse("accounts-create.html.jinja", {"request": request, "user": user_})
