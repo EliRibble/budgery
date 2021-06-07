@@ -43,6 +43,14 @@ class Institution(Base):
 	accounts = relationship("Account", back_populates="institution")
 Account.institution = relationship("Institution", back_populates="accounts")
 
+class LogEntry(Base):
+	"A log entry."
+	__tablename__ = "logentry"
+	id = Column(Integer, primary_key=True, index=True)
+	at = Column(DateTime())
+	content = Column(String)
+	user_id = Column(Integer, ForeignKey("user.id"))
+	
 class Transaction(Base):
 	__tablename__ = "transaction"
 
