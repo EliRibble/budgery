@@ -1,5 +1,13 @@
 {% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/account", "Accounts"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
 {% block content %}
+<p>Accounts are the real-world accounts held with different companies that contain your assets and liabilities</p>
 {% if accounts %}
 	<table>
 		<thead>
