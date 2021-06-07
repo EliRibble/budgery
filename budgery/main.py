@@ -217,10 +217,10 @@ async def transaction_post(request: Request, amount: float, db: Session = Depend
 	return RedirectResponse(url="/transactions")
 
 @app.get("/transaction", response_class=HTMLResponse)
-async def transaction_get(request: Request, db: Session = Depends(get_db)):
+async def transaction_list_get(request: Request, db: Session = Depends(get_db)):
 	user_ = request.session.get("user")
 	transactions = crud.transaction_list(db)
-	return templates.TemplateResponse("transactions.html.jinja", {
+	return templates.TemplateResponse("transaction-list.html.jinja", {
 		"current_page": "transaction",
 		"request": request,
 		"transactions": transactions,

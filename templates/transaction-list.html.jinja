@@ -1,4 +1,10 @@
 {% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/transaction", "Transactions"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
 {% block content %}
 <table>
 	<thead>
