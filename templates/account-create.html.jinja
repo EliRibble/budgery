@@ -1,4 +1,12 @@
 {% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/account", "Accounts"),
+	("/account/create", "Create"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
 {% block onready %}
 var element = document.getElementById("institution");
 M.Autocomplete.init(element, {
@@ -9,6 +17,7 @@ M.Autocomplete.init(element, {
 	}
 });
 {% endblock %}
+
 {% block content %}
 {% if not institutions %}
 	<p>This system does not have any institutions yet. You can't create an account without one. Please create one <a href="/institution/create">here</a></p>.
