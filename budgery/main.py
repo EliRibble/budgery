@@ -17,7 +17,6 @@ from budgery.user import User
 app = FastAPI()
 config = Config("env")
 db_engine = db_connection.connect(config)
-crud.create_tables(db_engine)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))

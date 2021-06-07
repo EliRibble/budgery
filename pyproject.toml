@@ -1,6 +1,7 @@
 [build-system]
 requires = [
 	"aiofiles == 0.7.0",
+	"alembic == 1.6.5",
 	"authlib == 0.15.3",
 	"fastapi == 0.65.1",
 	"httpx == 0.18.1",
