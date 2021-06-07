@@ -170,7 +170,7 @@ async def logout(request: Request):
 async def institution_get(request: Request, db: Session = Depends(get_db)):
 	user_ = request.session.get("user")
 	institutions = crud.institution_list(db)
-	return templates.TemplateResponse("institution.html.jinja", {
+	return templates.TemplateResponse("institution-list.html.jinja", {
 		"current_page": "institution",
 		"institutions": institutions,
 		"request": request,
