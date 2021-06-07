@@ -50,12 +50,32 @@ class LogEntry(Base):
 	at = Column(DateTime())
 	content = Column(String)
 	user_id = Column(Integer, ForeignKey("user.id"))
+
+class Sourcink(Base):
+	"""A source or sink for transactions.
+
+	Sourcinks are shared between all users in the system.
+	"""
+	__tablename__ = "sourcink"
+	id = Column(Integer, primary_key=True, index=True)
+	name = Column(String())
 	
 class Transaction(Base):
+	"""A transaction in the real world that moved money to/from a real world account.
+
+	The transaction should always include at least one account to/from and may include
+	up to one sourcink to/from. It is invalid to have both sourcink from and to
+	populated."""
 	__tablename__ = "transaction"
 
 	id = Column(Integer, primary_key=True, index=True)
+	account_id_from = Column(Integer, ForeignKey("account.id", name="fk_account_id_from"), nullable=True)
+	account_id_to = Column(Integer, ForeignKey("account.id", name="fk_account_id_to"), nullable=True)
 	amount = Column(Float)
+	at = Column(DateTime())
+	category = Column(String(), nullable=True)
+	sourcink_id_from = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_from"), nullable=True)
+	sourcink_id_to = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_to"), nullable=True)
 
 class User(Base):
 	__tablename__ = "user"
