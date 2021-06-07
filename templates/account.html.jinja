@@ -1,4 +1,12 @@
 {% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/account", "Accounts"),
+	("/account/{}".format(account.id), account.name),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
 {% block content %}
 {% if not account %}
 	<p>Sorry, an account with that ID does not exist or you don't have access to it.</p>
