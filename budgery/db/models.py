@@ -59,6 +59,7 @@ class Sourcink(Base):
 	"""
 	__tablename__ = "sourcink"
 	id = Column(Integer, primary_key=True, index=True)
+	account_id = Column(Integer, ForeignKey("account.id", name="fk_account_id"), nullable=True)
 	name = Column(String())
 	
 class Transaction(Base):
@@ -70,8 +71,6 @@ class Transaction(Base):
 	__tablename__ = "transaction"
 
 	id = Column(Integer, primary_key=True, index=True)
-	account_id_from = Column(Integer, ForeignKey("account.id", name="fk_account_id_from"), nullable=True)
-	account_id_to = Column(Integer, ForeignKey("account.id", name="fk_account_id_to"), nullable=True)
 	amount = Column(Float)
 	at = Column(DateTime())
 	category = Column(String(), nullable=True)
