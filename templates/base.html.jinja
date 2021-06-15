@@ -31,6 +31,11 @@
 
 			var sidenavs = document.querySelectorAll('.sidenav');
 			instances = M.Sidenav.init(sidenavs, {});
+
+			var datepickers = document.querySelectorAll('.datepicker');
+			instances = M.Datepicker.init(datepickers, {
+				autoClose: true,
+				format: "yyyy-mm-dd"});
 			{% block onready %}
 			{% endblock %}
 		});

@@ -1,0 +1,85 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/transaction", "Transactions"),
+	("/transaction/create", "Create"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block onready %}
+const autocompletes = ["sourcink_name_from", "sourcink_name_to"]
+for (const autocomplete of autocompletes) {
+	let element = document.getElementById(autocomplete);
+	M.Autocomplete.init(element, {
+		data: {
+			{% for sourcink in sourcinks %}
+				"{{ sourcink.name }}": null,
+			{% endfor %}
+		}
+	});
+}
+let element = document.getElementById("category")
+M.Autocomplete.init(element, {
+	data: {
+		{% for category in categories %}
+			"{{ category }}": null,
+		{% endfor %}
+	}
+});
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<form class="col s12" action="/transaction/create" method="POST">
+		<ul class="collection with-header">
+			<li class="collection-header blue lighten-4"><h1>Required</h1>
+			<li class="collection-item">
+				<div class="row">
+					<div class="input-field col s6">
+						<i class="material-icons prefix">call_made</i>
+						<input placeholder="Savings" id="sourcink_name_from" name="sourcink_name_from" type="text" class="validate">
+						<label for="name">From (Account/Sourcink)</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-field col s6">
+						<i class="material-icons prefix">call_received</i>
+						<input placeholder="Checking" id="sourcink_name_to" name="sourcink_name_to" type="text" class="validate">
+						<label for="name">To (Account/Sourcink)</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-field col s6">
+						<i class="material-icons prefix">attach_money</i>
+						<input placeholder="$1.35" id="amount" name="amount" type="text">
+						<label for="amount">Amount</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-field col s6">
+						<i class="material-icons prefix">date_range</i>
+						<input class="datepicker" id="at" name="at" type="text">
+						<label for="amount">Date</label>
+					</div>
+				</div>
+			</li>
+		</ul>
+		<ul class="collection with-header">
+			<li class="collection-header blue lighten-4"><h1>Optional</h1>
+			<li class="collection-item">
+				<div class="row">
+					<div class="input-field col s6">
+						<i class="material-icons prefix">tag</i>
+						<input placeholder="Bills" id="category" name="category" type="text">
+						<label for="category">Category</label>
+					</div>
+				</div>
+			</li>
+		</ul>
+		<button class="btn waves-effect waves-light" type="submit">Create
+			<i class="material-icons right">send</i>
+		</button>
+	</form>
+</div>
+{% endblock %}

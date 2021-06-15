@@ -1,3 +1,4 @@
+import datetime
 import logging
 from typing import Iterable
 
@@ -42,7 +43,10 @@ def account_update(db: Session, account: int, institution: int, name: str) -> No
 	account.name = name
 	account.institution = institution
 	db.commit()
-	
+
+def category_list(db: Session) -> Iterable[str]:
+	return db.query(models.Transaction.category).all()
+
 def create_tables(db: Session):
 	models.Base.metadata.create_all(bind=db)
 
@@ -62,7 +66,32 @@ def institution_create(db: Session, user: User, aba_routing_number: int, name: s
 	LOGGER.info("Created %s", institution)
 	return institution
 
-def transaction_create(db: Session, amount: int):
+def sourcink_list(db: Session) -> Iterable[models.Sourcink]:
+	return db.query(models.Sourcink).all()
+
+def sourcink_get_or_create(
+		db: Session,
+		name: str,
+	) -> models.Sourcink:
+	found = db.query(models.Sourcink).filter_by(name=name).first()
+	if found:
+		return found
+	sourcink = models.Sourcink(
+		account=None,
+		name=name,
+	)
+	db.add(sourcink)
+	db.commit()
+	return sourcink
+
+def transaction_create(
+		db: Session,
+		amount: float,
+		at: datetime.datetime,
+		category: str,
+		sourcink_from: models.Sourcink,
+		sourcink_to: models.Sourcink,
+	) -> models.Transaction:
 	transaction = models.Transaction(amount=amount)
 	db.add(transaction)
 	db.commit()

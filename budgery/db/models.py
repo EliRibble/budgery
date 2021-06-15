@@ -1,5 +1,6 @@
 import datetime
 import enum
+from typing import Optional
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -62,7 +63,7 @@ class Sourcink(Base):
 	account_id = Column(Integer, ForeignKey("account.id", name="fk_account_id"), nullable=True)
 	name = Column(String())
 
-	def __init__(self, account: "Account", name: str) -> None:
+	def __init__(self, account: Optional["Account"], name: str) -> None:
 		self.account = account
 		self.name = name
 	
