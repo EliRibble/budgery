@@ -20,6 +20,12 @@ def account_create(db: Session, institution_id: int, name: str, user: models.Use
 		type=models.AccountPermissionType.owner,
 		user=user,
 	)
+	sourcink = models.Sourcink(
+		account = account,
+		name = name,
+	)
+	db.add(account)
+	db.add(sourcink)
 	user.user_account_permissions.append(permission)
 	db.commit()
 

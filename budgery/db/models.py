@@ -61,6 +61,10 @@ class Sourcink(Base):
 	id = Column(Integer, primary_key=True, index=True)
 	account_id = Column(Integer, ForeignKey("account.id", name="fk_account_id"), nullable=True)
 	name = Column(String())
+
+	def __init__(self, account: "Account", name: str) -> None:
+		self.account = account
+		self.name = name
 	
 class Transaction(Base):
 	"""A transaction in the real world that moved money to/from a real world account.
@@ -91,4 +95,5 @@ AccountHistory = Account.__history_mapper__.class_
 AccountPermission.account = relationship("Account")
 AccountPermission.user = relationship(User,
 	backref=backref("user_account_permissions", cascade="all, delete-orphan"))
+Sourcink.account = relationship("Account")
 User.accounts = association_proxy("user_account_permissions", "account")
