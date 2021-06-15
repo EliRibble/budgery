@@ -92,7 +92,13 @@ def transaction_create(
 		sourcink_from: models.Sourcink,
 		sourcink_to: models.Sourcink,
 	) -> models.Transaction:
-	transaction = models.Transaction(amount=amount)
+	transaction = models.Transaction(
+		amount=amount,
+		at=at,
+		category=category,
+		sourcink_from=sourcink_from,
+		sourcink_to=sourcink_to,
+	)
 	db.add(transaction)
 	db.commit()
 	return transaction

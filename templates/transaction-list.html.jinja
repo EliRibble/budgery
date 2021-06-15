@@ -12,15 +12,22 @@
 		<tr>
 			<th>ID</th>
 			<th>Amount</th>
+			<th>Category</th>
+			<th>Date</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for txn in transactions %}
-			<tr><td>{{ txn.id }}</td><td>{{ txn.amount }}</td></tr>
+			<tr>
+				<td><a href="/transaction/{{ txn.id }}">{{ txn.id }}</a></td>
+				<td>{{ txn.amount }}</td>
+				<td>{{ txn.category }}</td>
+				<td>{{ txn.at }}</td>
+			</tr>
 		{% endfor %}
 	</tbody>
 </table>
-	<a class="btn-small waves-effect waves-light" href="/account/create"><i class="material-icons left">add</i>Create</a>
+	<a class="btn-small waves-effect waves-light" href="/transaction/create"><i class="material-icons left">add</i>Create</a>
 {% else %}
 	<p>No transactions yet, please <a href="/transaction/create">create one</a></p>
 {% endif %}

@@ -90,11 +90,13 @@ class User(Base):
 	username = Column(String, index=True)
 
 
-Institution.accounts = relationship("Account", back_populates="institution")
-Account.institution = relationship("Institution", back_populates="accounts")
+Institution.accounts = relationship(Account, back_populates="institution")
+Account.institution = relationship(Institution, back_populates="accounts")
 AccountHistory = Account.__history_mapper__.class_
-AccountPermission.account = relationship("Account")
+AccountPermission.account = relationship(Account)
 AccountPermission.user = relationship(User,
 	backref=backref("user_account_permissions", cascade="all, delete-orphan"))
-Sourcink.account = relationship("Account")
+Sourcink.account = relationship(Account)
+Transaction.sourcink_from = relationship(Sourcink, foreign_keys=[Transaction.sourcink_id_from])
+Transaction.sourcink_to = relationship(Sourcink, foreign_keys=[Transaction.sourcink_id_to])
 User.accounts = association_proxy("user_account_permissions", "account")

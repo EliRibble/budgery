@@ -244,6 +244,7 @@ async def transaction_create_post(
 	request: Request,
 	db: Session = Depends(get_db),
 	user: User = Depends(get_user),
+	category: str = Form(...),
 	sourcink_name_from: str = Form(...),
 	sourcink_name_to: str = Form(...),
 	amount: float = Form(...),
@@ -265,7 +266,7 @@ async def transaction_create_post(
 		sourcink_from=sourcink_from,
 		sourcink_to=sourcink_to,
 	)
-	return RedirectResponse(url="/transaction")
+	return RedirectResponse(status_code=303, url="/transaction")
 
 @app.get("/user")
 async def user_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
