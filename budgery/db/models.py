@@ -2,8 +2,9 @@ import datetime
 import enum
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, String
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref, relationship
 
 from budgery.db.history_meta import Versioned
 
@@ -22,26 +23,26 @@ class Account(Versioned, Base):
 			raise ValueError("Not the same type, can't compare")
 		return other.id == self.id
 
-AccountHistory = Account.__history_mapper__.class_
 
 class AccountPermissionType(enum.Enum):
 	owner = 1
 
 class AccountPermission(Base):
 	__tablename__ = "account_permission"
-	id = Column(Integer, primary_key=True, index=True)
-	account_id = Column(Integer, ForeignKey("account.id"))
+	account_id = Column(Integer, ForeignKey("account.id"), primary_key=True)
+	user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
 	type = Column(Enum(AccountPermissionType))
-	user_id = Column(Integer, ForeignKey("user.id"))
+
+	def __init__(self, account: "Account", type: AccountPermissionType, user: "User") -> None:
+		self.account = account
+		self.type = type
+		self.user = user
 
 class Institution(Base):
 	__tablename__ = "institution"
 	id = Column(Integer, primary_key=True, index=True)
 	name = Column(String)
 	aba_routing_number = Column(Integer)
-
-	accounts = relationship("Account", back_populates="institution")
-Account.institution = relationship("Institution", back_populates="accounts")
 
 class LogEntry(Base):
 	"A log entry."
@@ -83,3 +84,12 @@ class User(Base):
 	id = Column(Integer, primary_key=True, index=True)
 	email = Column(String)
 	username = Column(String, index=True)
+
+
+Institution.accounts = relationship("Account", back_populates="institution")
+Account.institution = relationship("Institution", back_populates="accounts")
+AccountHistory = Account.__history_mapper__.class_
+AccountPermission.account = relationship("Account")
+AccountPermission.user = relationship(User,
+	backref=backref("user_account_permissions", cascade="all, delete-orphan"))
+User.accounts = association_proxy("user_account_permissions", "account")

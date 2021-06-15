@@ -61,16 +61,16 @@ async def root(request: Request, db: Session = Depends(get_db)):
 	return templates.TemplateResponse("index.html.jinja", {"request": request, "user": user_})
 
 @app.get("/account")
-async def account_list_get(request: Request, db: Session = Depends(get_db)):
-	user_ = request.session.get("user")
+async def account_list_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
 	institutions = crud.institution_list(db)
-	accounts = crud.account_list(db)
+	db_user = crud.user_get_by_username(db, user.username)
+	accounts = db_user.accounts
 	return templates.TemplateResponse("account-list.html.jinja", {
 		"accounts": accounts,
 		"current_page": "account",
 		"institutions": institutions,
 		"request": request,
-		"user": user_})
+		"user": user})
 
 @app.get("/account/create")
 async def accounts_create_get(request: Request, db: Session = Depends(get_db)):
@@ -83,14 +83,14 @@ async def accounts_create_get(request: Request, db: Session = Depends(get_db)):
 	})
 
 @app.post("/account/create")
-async def accounts_create_post(request: Request, db: Session = Depends(get_db), name: str = Form(...), institution_name: str = Form(...)):
-	user_ = request.session.get("user")
+async def accounts_create_post(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user), name: str = Form(...), institution_name: str = Form(...)):
+	db_user = crud.user_get_by_username(db, user.username)
 	institution = crud.institution_get_by_name(db, institution_name)
 	crud.account_create(
 		db = db,
 		institution_id = institution.id,
 		name = name,
-		user = user_,
+		user = db_user,
 	)
 	return RedirectResponse(status_code=303, url="/account")
 

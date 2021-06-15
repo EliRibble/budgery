@@ -10,12 +10,17 @@ from budgery.user import User
 
 LOGGER = logging.getLogger(__name__)
 
-def account_create(db: Session, institution_id: int, name: str, user: User) -> models.Account:
+def account_create(db: Session, institution_id: int, name: str, user: models.User) -> models.Account:
 	account = models.Account(
 		institution_id = institution_id,
 		name = name,
 	)
-	db.add(account)
+	permission = models.AccountPermission(
+		account=account,
+		type=models.AccountPermissionType.owner,
+		user=user,
+	)
+	user.user_account_permissions.append(permission)
 	db.commit()
 
 def account_get_by_id(db: Session, account_id: int) -> models.Account:
@@ -24,7 +29,7 @@ def account_get_by_id(db: Session, account_id: int) -> models.Account:
 def account_history_list_by_account_id(db: Session, account_id: int) -> Iterable[models.AccountHistory]:
 	return db.query(models.AccountHistory).all()
 
-def account_list(db: Session):
+def account_list(db: Session, user: models.User):
 	return db.query(models.Account).all()
 
 def account_update(db: Session, account: int, institution: int, name: str) -> None:
