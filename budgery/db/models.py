@@ -39,6 +39,20 @@ class AccountPermission(Base):
 		self.type = type
 		self.user = user
 
+class ImportJobStatus(enum.Enum):
+	error = 0
+	started = 1
+	finished = 2
+
+class ImportJob(Base):
+	"A background task to import a large set of transactions."
+	__tablename__ = "import_job"
+	id = Column(Integer, primary_key=True, index=True)
+	created = Column(DateTime, default=datetime.datetime.now)
+	filename = Column(String)
+	status = Column(Enum(ImportJobStatus))
+	user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
+
 class Institution(Base):
 	__tablename__ = "institution"
 	id = Column(Integer, primary_key=True, index=True)
@@ -79,6 +93,7 @@ class Transaction(Base):
 	amount = Column(Float)
 	at = Column(DateTime())
 	category = Column(String(), nullable=True)
+	import_job_id = Column(Integer, ForeignKey("import_job.id", name="fk_import_job_id"), nullable=True)
 	sourcink_id_from = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_from"), nullable=True)
 	sourcink_id_to = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_to"), nullable=True)
 
@@ -96,6 +111,7 @@ AccountHistory = Account.__history_mapper__.class_
 AccountPermission.account = relationship(Account)
 AccountPermission.user = relationship(User,
 	backref=backref("user_account_permissions", cascade="all, delete-orphan"))
+ImportJob.user = relationship(User)
 Sourcink.account = relationship(Account)
 Transaction.sourcink_from = relationship(Sourcink, foreign_keys=[Transaction.sourcink_id_from])
 Transaction.sourcink_to = relationship(Sourcink, foreign_keys=[Transaction.sourcink_id_to])
