@@ -2,7 +2,7 @@ import datetime
 from typing import Mapping, Union
 
 from authlib.integrations.starlette_client import OAuth, OAuthError
-from fastapi import Depends, FastAPI, Form, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -11,6 +11,7 @@ from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 
+from budgery import task
 from budgery.db import connection as db_connection
 from budgery.db import crud
 from budgery.user import User
@@ -167,15 +168,50 @@ async def logout(request: Request):
 	request.session.pop("user", None)
 	return RedirectResponse(url="/")
 
+@app.get("/import")
+async def import_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+	return templates.TemplateResponse("import-create.html.jinja", {
+		"request": request,
+		"user": user,
+	})
+
+@app.post("/import/create")
+async def import_create_post(
+		request: Request,
+		background_tasks: BackgroundTasks,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user),
+		csv_file: UploadFile = File(...),
+	):
+	db_user = crud.user_get_by_username(db, user.username)
+	import_job = crud.import_job_create(
+		db = db,
+		filename = csv_file.filename,
+		user = db_user,
+	)
+	background_tasks.add_task(
+		task.process_transaction_upload,
+		csv_file=csv_file,
+		db=db,
+		import_job=import_job,
+		user=db_user,
+	)
+	return templates.TemplateResponse("import-create.html.jinja", {
+		"request": request,
+		"user": user,
+	})
+
 @app.get("/institution")
-async def institution_get(request: Request, db: Session = Depends(get_db)):
-	user_ = request.session.get("user")
+async def institution_get(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
 	institutions = crud.institution_list(db)
 	return templates.TemplateResponse("institution-list.html.jinja", {
 		"current_page": "institution",
 		"institutions": institutions,
 		"request": request,
-		"user": user_})
+		"user": user})
 
 @app.get("/institution/create")
 async def institution_create_get(request: Request):

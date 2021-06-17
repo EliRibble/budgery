@@ -51,7 +51,12 @@ class ImportJob(Base):
 	created = Column(DateTime, default=datetime.datetime.now)
 	filename = Column(String)
 	status = Column(Enum(ImportJobStatus))
-	user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
+	user_id = Column(Integer, ForeignKey("user.id"))
+
+	def __init__(self, filename: str, status: ImportJobStatus, user: "User") -> None:
+		self.filename = filename
+		self.status = status
+		self.user = user
 
 class Institution(Base):
 	__tablename__ = "institution"
@@ -96,6 +101,22 @@ class Transaction(Base):
 	import_job_id = Column(Integer, ForeignKey("import_job.id", name="fk_import_job_id"), nullable=True)
 	sourcink_id_from = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_from"), nullable=True)
 	sourcink_id_to = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_to"), nullable=True)
+
+	def __init__(self,
+		amount: float,
+		at: datetime.datetime,
+		sourcink_from: Sourcink,
+		sourcink_to: Sourcink,
+		category: Optional[str] = None,
+		import_job: Optional[ImportJob] = None,
+	) -> None:
+		self.amount = amount
+		self.at = at
+		self.category = category
+		self.import_job = import_job
+		self.sourcink_from = sourcink_from
+		self.sourcink_to = sourcink_to
+		
 
 class User(Base):
 	__tablename__ = "user"

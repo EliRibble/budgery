@@ -1,0 +1,22 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/import", "Import Transactions"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<form class="col s12" action="/import/create" method="POST" enctype="multipart/form-data">
+		<div class="row">
+			<div class="input-field col s6">
+				<input id="csv_file" name="csv_file" type="file">
+			</div>
+		</div>
+		<div class="row">
+			<input type="submit">
+		</div>
+	</form>
+</div>
+{% endblock %}

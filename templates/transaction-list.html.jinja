@@ -7,28 +7,37 @@
 {% endblock %}
 {% block content %}
 {% if transactions %}
-<table>
-	<thead>
-		<tr>
-			<th>ID</th>
-			<th>Amount</th>
-			<th>Category</th>
-			<th>Date</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for txn in transactions %}
+<div class="row">
+	<table>
+		<thead>
 			<tr>
-				<td><a href="/transaction/{{ txn.id }}">{{ txn.id }}</a></td>
-				<td>{{ txn.amount }}</td>
-				<td>{{ txn.category }}</td>
-				<td>{{ txn.at }}</td>
+				<th>ID</th>
+				<th>Amount</th>
+				<th>Category</th>
+				<th>Date</th>
 			</tr>
-		{% endfor %}
-	</tbody>
-</table>
-	<a class="btn-small waves-effect waves-light" href="/transaction/create"><i class="material-icons left">add</i>Create</a>
+		</thead>
+		<tbody>
+			{% for txn in transactions %}
+				<tr>
+					<td><a href="/transaction/{{ txn.id }}">{{ txn.id }}</a></td>
+					<td>{{ txn.amount }}</td>
+					<td>{{ txn.category }}</td>
+					<td>{{ txn.at }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
 {% else %}
 	<p>No transactions yet, please <a href="/transaction/create">create one</a></p>
 {% endif %}
+<div class="row">
+	<div class="col s6">
+		<a class="btn-small waves-effect waves-light" href="/transaction/create"><i class="material-icons left">add</i>Create</a>
+	</div>
+	<div class="col s6">
+		<a class="btn-small waves-effect waves-light green" href="/import"><i class="material-icons left">import_export</i>Import</a>
+	</div>
+</div>
 {% endblock %}

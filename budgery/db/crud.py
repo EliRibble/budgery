@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Iterable
+from typing import Iterable, Optional
 
 from sqlalchemy.orm import Session
 
@@ -50,6 +50,20 @@ def category_list(db: Session) -> Iterable[str]:
 def create_tables(db: Session):
 	models.Base.metadata.create_all(bind=db)
 
+def import_job_create(db: Session, filename: str, user: models.User) -> models.ImportJob:
+	job = models.ImportJob(
+		filename = filename,
+		status = models.ImportJobStatus.started,
+		user = user,
+	)
+	db.add(job)
+	db.commit()
+	return job
+
+def import_job_finish(db: Session, import_job: models.ImportJob) -> None:
+	import_job.status = models.ImportJobStatus.finished
+	db.commit()
+
 def institution_get_by_name(db: Session, name: str) -> models.Institution:
 	return db.query(models.Institution).filter(name==name).first()
 
@@ -91,11 +105,13 @@ def transaction_create(
 		category: str,
 		sourcink_from: models.Sourcink,
 		sourcink_to: models.Sourcink,
+		import_job: Optional[models.ImportJob],
 	) -> models.Transaction:
 	transaction = models.Transaction(
 		amount=amount,
 		at=at,
 		category=category,
+		import_job=import_job,
 		sourcink_from=sourcink_from,
 		sourcink_to=sourcink_to,
 	)
