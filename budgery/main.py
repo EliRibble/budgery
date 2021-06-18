@@ -311,6 +311,19 @@ async def transaction_create_post(
 	)
 	return RedirectResponse(status_code=303, url="/transaction")
 
+@app.get("/transaction/{transaction_id}")
+async def transaction_get(
+		request: Request,
+		transaction_id: int,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
+	transaction = crud.transaction_get_by_id(db, transaction_id)
+	return templates.TemplateResponse("transaction.html.jinja", {
+		"current_page": "account",
+		"request": request,
+		"transaction": transaction,
+		"user": user})
+
 @app.get("/user")
 async def user_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
 	user_data = request.session.get("user")

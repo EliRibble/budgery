@@ -119,6 +119,9 @@ def transaction_create(
 	db.commit()
 	return transaction
 
+def transaction_get_by_id(db: Session, transaction_id: int) -> models.Transaction:
+	return db.query(models.Transaction).filter_by(id=transaction_id).first()
+
 def transaction_list(db: Session):
 	return db.query(models.Transaction).all()
 

@@ -1,0 +1,41 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/transaction", "Transactions"),
+	("/transaction/{}".format(transaction.id), "#{}".format(transaction.id)),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block content %}
+{% if not transaction %}
+	<p>Sorry, an transaction with that ID does not exist or you don't have access to it.</p>
+{% else %}
+<a href="/transaction/{{ transaction.id }}/edit">Edit</a>
+<table>
+	<thead>
+		<tr>
+			<th>Property</th>
+			<th>Value</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>ID</td><td>{{ transaction.id }}</td></tr>
+		<tr><td>Amount</td><td>{{ transaction.amount }}</td></tr>
+		<tr><td>Date</td><td>{{ transaction.at }}</td></tr>
+		<tr><td>Category</td><td>{{ transaction.category }}</td></tr>
+		<tr>
+			<td>From</td>
+			<td><a href="/sourcink/{{ transaction.sourcink_id_from }}">
+				{{ transaction.sourcink_from.name }}
+			</a></td>
+		</tr>
+			<td>To</td>
+			<td><a href="/sourcink/{{ transaction.sourcink_id_to }}">
+				{{ transaction.sourcink_to.name }}
+			</a></td>
+		</tr>
+	</tbody>
+</table>
+{% endif %}
+{% endblock %}
