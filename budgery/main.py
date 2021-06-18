@@ -240,13 +240,25 @@ async def report(request: Request):
 		"request": request,
 		"user": user_})
 
+@app.get("/sourcinks", response_class=HTMLResponse)
+async def sourcinks_list_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+	"Get list of sourcinks."
+	db_user = crud.user_get_by_username(db, user.username)
+	sourcinks = crud.sourcink_list(db, db_user)
+	sourcinks = sorted(sourcinks, key=lambda s: s.name)
+	return templates.TemplateResponse("sourcink-list.html.jinja", {
+		"request": request,
+		"sourcinks": sourcinks,
+		"user": user,
+	})
+	
 @app.get("/tag")
 async def tag(request: Request):
-	user_ = request.session.get("user")
+	user = request.session.get("user")
 	return templates.TemplateResponse("tag.html.jinja", {
 		"current_page": "tag",
 		"request": request,
-		"user": user_})
+		"user": user})
 
 @app.get("/transaction", response_class=HTMLResponse)
 async def transaction_list_get(request: Request, db: Session = Depends(get_db)):
@@ -267,7 +279,7 @@ async def transaction_list_post(request: Request, amount: float, db: Session = D
 async def transaction_create_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
 	db_user = crud.user_get_by_username(db, user.username)
 	categories = crud.category_list(db)
-	sourcinks = crud.sourcink_list(db)
+	sourcinks = crud.sourcink_list(db, db_user)
 	return templates.TemplateResponse("transaction-create.html.jinja", {
 		"categories": categories,
 		"request": request,

@@ -1,0 +1,33 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/sourcink", "Sourcinks"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+{% block content %}
+{% if sourcinks %}
+<div class="row">
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				<th>Account ID</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for sourcink in sourcinks %}
+				<tr>
+					<td><a href="/sourcink/{{ sourcink.id }}">{{ sourcink.id }}</a></td>
+					<td>{{ sourcink.name }}</td>
+					<td>{{ sourcink.account_id }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% else %}
+	<p>No sourcinks yet.</p>
+{% endif %}
+{% endblock %}
