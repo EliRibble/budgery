@@ -1,9 +1,38 @@
 {% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/", "Main"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
 {% block content %}
-<p>Welcome to Budgery</p>
+<h1>Overview</h1>
 <p>
-{% for name, url in sso_logins %}
-	<a href="{{url}}">{{ name }}</a>
-{% endfor %}
+	Budgery is a system for managing finances. It's designed for a family. This means in practical terms that it has the following design goals:
+</p>
+<ul>
+	<li>Multi-user with cooperation and data sharing</li>
+	<li>An audit trail with history and logs to figure out what was done by who, when.</li>
+	<li>Easy reconciliation by keeping a time-based running total of all accounts.</li>
+	<li>Zero-based budgeting. Every dollar has a job and a label</li>
+</ul>
+<p>
+	Budgery allows for imports from various other systems (Bank CSV, OFX, etc). In addition it is designed to be self-hosted first and support single-sign on (SSO) to make using it easy on users
+</p>
+<h1>Concepts</h1>
+<p>
+	Budgery has several concepts. It's important to understand these to work effectively within the constraints Budgery provides. Concepts can be roughly broken up into tracking reality and managing plans.
+</p>
+<h2>Tracking Reality</h2>
+<p>
+Budgery provides Institutions, Accounts, and Transactions. These correspond to businesses that hold your assets, information about what assets they hold, and the movement of those assets. This data can be entered manually or imported from these institutions. Every week or month you'll want to Reconcile these accounts to mark that you have accurate information in Budgery.
+</p>
+<h2>Managing Plans</h2>
+<p>
+With a good snapshot of reality you are prepared to start making plans in Budgery. The goal of making and tracking plans is to help you make decisions about what to do with your money. This can be as simple as "do I have enough money to buy this cookie?" to "should I re-allocate my investments?". Allocations help you understand what your assets are supposed to be doing for you. Projections help you plan the future of you inflow and outflow from various Sourcinks (sources/sinks).
+</p>
+<h2>Reporting</h2>
+<p>
+Through all of this you can apply Categories and Tags to help conceptually organize what is happening with your assets. You can use these, along with all your other data, to build reports tracking your progress against your plans and help you formulate better plans to reach your goals.
 </p>
 {% endblock %}
