@@ -270,11 +270,6 @@ async def transaction_list_get(request: Request, db: Session = Depends(get_db)):
 		"transactions": transactions,
 		"user": user_})
 
-@app.post("/transaction")
-async def transaction_list_post(request: Request, amount: float, db: Session = Depends(get_db)):
-	crud.transaction_create(db, amount)
-	return RedirectResponse(url="/transactions")
-
 @app.get("/transaction/create")
 async def transaction_create_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
 	db_user = crud.user_get_by_username(db, user.username)
