@@ -46,7 +46,6 @@ class Budget(Versioned, Base):
 	id = Column(Integer, primary_key=True, index=True)
 	start_date = Column(Date)
 	end_date = Column(Date)
-	type = Column(Enum(AccountPermissionType))
 
 	def __eq__(self, other) -> bool:
 		if other is None:
