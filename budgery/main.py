@@ -1,3 +1,4 @@
+import calendar
 import datetime
 from typing import Mapping, Union
 
@@ -166,6 +167,21 @@ async def budget_list_get(
 		"current_page": "budget",
 		"request": request,
 		"user": user})
+
+@app.get("/budget/create", response_class=HTMLResponse)
+async def budget_create_get(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
+	default_end_date = datetime.date.today()
+	default_end_date = default_end_date.replace(
+		day=calendar.monthrange(default_end_date.year, default_end_date.month)[1])
+	default_start_date = datetime.date.today().replace(day=1)
+	return templates.TemplateResponse("budget-create.html.jinja", {
+		"default_end_date": default_end_date,
+		"default_start_date": default_start_date,
+		"request": request,
+		 "user": user})
 
 @app.get("/category")
 async def category(request: Request):
