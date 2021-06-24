@@ -58,9 +58,8 @@ def _parse_user(user_data: Mapping[str, Union[int, str]]) -> User:
 	return user_model
 
 @app.get("/", response_class=HTMLResponse)
-async def root(request: Request, db: Session = Depends(get_db)):
-	user_ = request.session.get("user")
-	return templates.TemplateResponse("index.html.jinja", {"request": request, "user": user_})
+async def root(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+	return templates.TemplateResponse("index.html.jinja", {"request": request, "user": user})
 
 @app.get("/account")
 async def account_list_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
@@ -75,17 +74,21 @@ async def account_list_get(request: Request, db: Session = Depends(get_db), user
 		"user": user})
 
 @app.get("/account/create")
-async def accounts_create_get(request: Request, db: Session = Depends(get_db)):
-	user_ = request.session.get("user")
+async def accounts_create_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
 	institutions = crud.institution_list(db)
 	return templates.TemplateResponse("account-create.html.jinja", {
 		"institutions": institutions,
 		"request": request,
-		 "user": user_
+		 "user": user
 	})
 
 @app.post("/account/create")
-async def accounts_create_post(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user), name: str = Form(...), institution_name: str = Form(...)):
+async def accounts_create_post(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user),
+		name: str = Form(...),
+		institution_name: str = Form(...)):
 	db_user = crud.user_get_by_username(db, user.username)
 	institution = crud.institution_get_by_name(db, institution_name)
 	crud.account_create(
@@ -97,8 +100,7 @@ async def accounts_create_post(request: Request, db: Session = Depends(get_db), 
 	return RedirectResponse(status_code=303, url="/account")
 
 @app.get("/account/{account_id}")
-async def account_get(request: Request, account_id: int, db: Session = Depends(get_db)):
-	user_ = request.session.get("user")
+async def account_get(request: Request, account_id: int, db: Session = Depends(get_db), user: User = Depends(get_user)):
 	account = crud.account_get_by_id(db, account_id)
 	history = crud.account_history_list_by_account_id(db, account_id)
 	return templates.TemplateResponse("account.html.jinja", {
@@ -106,11 +108,10 @@ async def account_get(request: Request, account_id: int, db: Session = Depends(g
 		"current_page": "account",
 		"history": history,
 		"request": request,
-		"user": user_})
+		"user": user})
 
 @app.get("/account/{account_id}/edit")
-async def account_edit_get(request: Request, account_id: int, db: Session = Depends(get_db)):
-	user_ = request.session.get("user")
+async def account_edit_get(request: Request, account_id: int, db: Session = Depends(get_db), user: User = Depends(get_user)):
 	account = crud.account_get_by_id(db, account_id)
 	return templates.TemplateResponse("account-edit.html.jinja", {
 		"account": account,
@@ -119,8 +120,12 @@ async def account_edit_get(request: Request, account_id: int, db: Session = Depe
 		"user": user_})
 
 @app.post("/account/{account_id}/edit")
-async def account_edit_post(request: Request, account_id: int, name: str = Form(...), institution_name: str = Form(...), db: Session = Depends(get_db)):
-	user_ = request.session.get("user")
+async def account_edit_post(
+		request: Request,
+		account_id: int,
+		name: str = Form(...),
+		institution_name: str = Form(...),
+		db: Session = Depends(get_db)):
 	account = crud.account_get_by_id(db, account_id)
 	institution = crud.institution_get_by_name(db, institution_name)
 	crud.account_update(db,
@@ -131,12 +136,11 @@ async def account_edit_post(request: Request, account_id: int, name: str = Form(
 	return RedirectResponse(status_code=303, url=f"/account/{account.id}")
 
 @app.route("/allocation")
-async def allocation(request: Request):
-	user_ = request.session.get("user")
+async def allocation(request: Request, user: User = Depends(get_user)):
 	return templates.TemplateResponse("allocation.html.jinja", {
 		"current_page": "allocation",
 		"request": request,
-		"user": user_})
+		"user": user})
 
 @app.get("/auth", response_class=HTMLResponse)
 async def auth(request: Request, db: Session = Depends(get_db)):
@@ -144,19 +148,19 @@ async def auth(request: Request, db: Session = Depends(get_db)):
 		token = await oauth.keycloak.authorize_access_token(request)
 	except OAuthError as error:
 		return HTMLResponse(f"<h1>{error.error}</h1>")
-	user_ = await oauth.keycloak.parse_id_token(request, token)
-	user_model = _parse_user(user_)
+	user = await oauth.keycloak.parse_id_token(request, token)
+	user_model = _parse_user(user)
 	crud.user_ensure_exists(db, user_model)
-	request.session["user"] = dict(user_)
+	request.session["user"] = dict(user)
 	return RedirectResponse(url="/")
 
 @app.get("/category")
 async def category(request: Request):
-	user_ = request.session.get("user")
+	user = request.session.get("user")
 	return templates.TemplateResponse("category.html.jinja", {
 		"current_page": "category",
 		"request": request,
-		"user": user_})
+		"user": user})
 
 @app.route("/login")
 async def login(request: Request):
@@ -214,34 +218,39 @@ async def institution_get(
 		"user": user})
 
 @app.get("/institution/create")
-async def institution_create_get(request: Request):
-	user_ = request.session.get("user")
+async def institution_create_get(request: Request, user: User = Depends(get_user)):
 	return templates.TemplateResponse("institution-create.html.jinja", {
 		"current_page": "institution",
 		"request": request,
-		"user": user_})
+		"user": user})
 
 @app.post("/institution/create")
-async def institution_create_post(request: Request, db: Session = Depends(get_db), aba_routing_number: int = Form(...), name: str = Form(...)):
-	user_ = request.session.get("user")
+async def institution_create_post(
+		request: Request,
+		db: Session = Depends(get_db),
+		aba_routing_number: int = Form(...),
+		name: str = Form(...),
+		user: User = Depends(get_user)):
 	crud.institution_create(
 		aba_routing_number=aba_routing_number,
 		db=db,
 		name=name,
-		user=user_,
+		user=user,
 	)
 	return RedirectResponse(status_code=303, url="/institution")
 
 @app.get("/report")
-async def report(request: Request):
-	user_ = request.session.get("user")
+async def report(request: Request, user: User = Depends(get_user)):
 	return templates.TemplateResponse("report.html.jinja", {
 		"current_page": "report",
 		"request": request,
-		"user": user_})
+		"user": user})
 
 @app.get("/sourcinks", response_class=HTMLResponse)
-async def sourcinks_list_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+async def sourcinks_list_get(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
 	"Get list of sourcinks."
 	db_user = crud.user_get_by_username(db, user.username)
 	sourcinks = crud.sourcink_list(db, db_user)
@@ -253,25 +262,29 @@ async def sourcinks_list_get(request: Request, db: Session = Depends(get_db), us
 	})
 	
 @app.get("/tag")
-async def tag(request: Request):
-	user = request.session.get("user")
+async def tag(request: Request, user: User = Depends(get_user)):
 	return templates.TemplateResponse("tag.html.jinja", {
 		"current_page": "tag",
 		"request": request,
 		"user": user})
 
 @app.get("/transaction", response_class=HTMLResponse)
-async def transaction_list_get(request: Request, db: Session = Depends(get_db)):
-	user_ = request.session.get("user")
+async def transaction_list_get(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
 	transactions = crud.transaction_list(db)
 	return templates.TemplateResponse("transaction-list.html.jinja", {
 		"current_page": "transaction",
 		"request": request,
 		"transactions": transactions,
-		"user": user_})
+		"user": user})
 
 @app.get("/transaction/create")
-async def transaction_create_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+async def transaction_create_get(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
 	db_user = crud.user_get_by_username(db, user.username)
 	categories = crud.category_list(db)
 	sourcinks = crud.sourcink_list(db, db_user)
