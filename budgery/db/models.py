@@ -20,6 +20,8 @@ class Account(Versioned, Base):
 	name = Column(String)
 
 	def __eq__(self, other) -> bool:
+		if other is None:
+			return False
 		if not isinstance(other, Account):
 			raise ValueError("Not the same type, can't compare")
 		return other.id == self.id
