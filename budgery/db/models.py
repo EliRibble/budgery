@@ -2,7 +2,7 @@ import datetime
 import enum
 from typing import Optional
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
@@ -41,6 +41,41 @@ class AccountPermission(Base):
 		self.type = type
 		self.user = user
 
+class Budget(Versioned, Base):
+	__tablename__ = "budget"
+	id = Column(Integer, primary_key=True, index=True)
+	start_date = Column(Date)
+	end_date = Column(Date)
+	type = Column(Enum(AccountPermissionType))
+
+	def __eq__(self, other) -> bool:
+		if other is None:
+			return False
+		if not isinstance(other, Budget):
+			raise ValueError("Not the same type, can't compare")
+		return other.id == self.id
+
+class BudgetPermissionType(enum.Enum):
+	owner = 1
+
+class BudgetPermission(Base):
+	__tablename__ = "budget_permission"
+	budget_id = Column(Integer, ForeignKey("budget.id"), primary_key=True)
+	user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
+	type = Column(Enum(BudgetPermissionType))
+
+	def __init__(self, budget: "Budget", type: BudgetPermissionType, user: "User") -> None:
+		self.budget = budget
+		self.type = type
+		self.user = user
+
+class BudgetEntry(Base):
+	__tablename__ = "budget_entry"
+	id = Column(Integer, primary_key=True, index=True)
+	budget_id = Column(Integer, ForeignKey("budget.id"))
+	name = Column(String)
+	amount = Column(Float)
+	
 class ImportJobStatus(enum.Enum):
 	error = 0
 	started = 1
@@ -99,6 +134,7 @@ class Transaction(Base):
 	id = Column(Integer, primary_key=True, index=True)
 	amount = Column(Float)
 	at = Column(DateTime())
+	budget_entry = Column(Integer, ForeignKey("budget_entry.id", name="fk_budget_entry_id"), nullable=True)
 	category = Column(String(), nullable=True)
 	import_job_id = Column(Integer, ForeignKey("import_job.id", name="fk_import_job_id"), nullable=True)
 	sourcink_id_from = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_from"), nullable=True)
@@ -109,11 +145,13 @@ class Transaction(Base):
 		at: datetime.datetime,
 		sourcink_from: Sourcink,
 		sourcink_to: Sourcink,
+		budget_entry: Optional[BudgetEntry] = None,
 		category: Optional[str] = None,
 		import_job: Optional[ImportJob] = None,
 	) -> None:
 		self.amount = amount
 		self.at = at
+		self.budget_entry = budget_entry
 		self.category = category
 		self.import_job = import_job
 		self.sourcink_from = sourcink_from
@@ -134,8 +172,15 @@ AccountHistory = Account.__history_mapper__.class_
 AccountPermission.account = relationship(Account)
 AccountPermission.user = relationship(User,
 	backref=backref("user_account_permissions", cascade="all, delete-orphan"))
+BudgetHistory = Budget.__history_mapper__.class_
+BudgetPermission.budget = relationship(Budget)
+BudgetPermission.user = relationship(User,
+	backref=backref("user_budget_permissions", cascade="all, delete-orphan"))
+BudgetEntry.budget = relationship(Budget)
+BudgetEntry.transactions = relationship(Transaction)
 ImportJob.user = relationship(User)
 Sourcink.account = relationship(Account)
+Transaction.budget_entry = relationship(BudgetEntry, back_populates="transactions")
 Transaction.sourcink_from = relationship(Sourcink, foreign_keys=[Transaction.sourcink_id_from])
 Transaction.sourcink_to = relationship(Sourcink, foreign_keys=[Transaction.sourcink_id_to])
 User.accounts = association_proxy("user_account_permissions", "account")
