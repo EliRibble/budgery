@@ -21,6 +21,8 @@
 			{% for budget in budgets %}
 				<tr>
 					<td><a href="/budget/{{ budget.id }}">{{ budget.id }}</a></td>
+					<td>{{ budget.start_date.isoformat() }}</td>
+					<td>{{ budget.end_date.isoformat() }}</td>
 				</tr>
 			{% endfor %}
 		</tbody>

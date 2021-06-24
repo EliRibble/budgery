@@ -183,6 +183,23 @@ async def budget_create_get(
 		"request": request,
 		 "user": user})
 
+@app.post("/budget/create")
+async def budget_create_post(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user),
+		end_date_str: str = Form(...),
+		start_date_str: str = Form(...)):
+	db_user = crud.user_get_by_username(db, user.username)
+	end_date = datetime.date.fromisoformat(end_date_str)
+	start_date = datetime.date.fromisoformat(start_date_str)
+	crud.budget_create(
+		db = db,
+		end_date = end_date,
+		start_date = start_date,
+		user = db_user)
+	return RedirectResponse(status_code=303, url="/budget")
+	
 @app.get("/category")
 async def category(request: Request):
 	user = request.session.get("user")

@@ -44,6 +44,24 @@ def account_update(db: Session, account: int, institution: int, name: str) -> No
 	account.institution = institution
 	db.commit()
 
+def budget_create(
+		db: Session,
+		end_date: datetime.date,
+		start_date: datetime.date,
+		user: models.User) -> models.Budget:
+	budget = models.Budget(
+		end_date = end_date,
+		start_date = start_date,
+	)
+	permission = models.BudgetPermission(
+		budget=budget,
+		type=models.BudgetPermissionType.owner,
+		user=user,
+	)
+	db.add(budget)
+	user.user_budget_permissions.append(permission)
+	db.commit()
+
 def category_list(db: Session) -> Iterable[str]:
 	return db.query(models.Transaction.category).all()
 
