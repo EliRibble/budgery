@@ -1,0 +1,32 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/budget", "Budgets"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block content %}
+<p>Budgets are for planning inflow and outflow over a period of time to balance out.</p>
+{% if budgets %}
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Start</th>
+				<th>End</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for budget in budgets %}
+				<tr>
+					<td><a href="/budget/{{ budget.id }}">{{ budget.id }}</a></td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	<a class="btn-small waves-effect waves-light" href="/budget/create"><i class="material-icons left">add</i>Create</a>
+{% else %}
+	<p>No budgets yet, please <a href="/budget/create">create one</a></p>
+{% endif %}
+{% endblock %}

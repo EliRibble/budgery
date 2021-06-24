@@ -184,3 +184,4 @@ Transaction.budget_entry = relationship(BudgetEntry, back_populates="transaction
 Transaction.sourcink_from = relationship(Sourcink, foreign_keys=[Transaction.sourcink_id_from])
 Transaction.sourcink_to = relationship(Sourcink, foreign_keys=[Transaction.sourcink_id_to])
 User.accounts = association_proxy("user_account_permissions", "account")
+User.budgets = association_proxy("user_budget_permissions", "budget")

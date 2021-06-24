@@ -154,6 +154,19 @@ async def auth(request: Request, db: Session = Depends(get_db)):
 	request.session["user"] = dict(user)
 	return RedirectResponse(url="/")
 
+@app.get("/budget", response_class=HTMLResponse)
+async def budget_list_get(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
+	db_user = crud.user_get_by_username(db, user.username)
+	budgets = db_user.budgets
+	return templates.TemplateResponse("budget-list.html.jinja", {
+		"budgets": budgets,
+		"current_page": "budget",
+		"request": request,
+		"user": user})
+
 @app.get("/category")
 async def category(request: Request):
 	user = request.session.get("user")
