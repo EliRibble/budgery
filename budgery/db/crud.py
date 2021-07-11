@@ -62,6 +62,31 @@ def budget_create(
 	user.user_budget_permissions.append(permission)
 	db.commit()
 
+def budget_entry_create(
+		db: Session,
+		amount: float,
+		budget: models.Budget,
+		category: str,
+		name: str,
+		user: models.User) -> models.BudgetEntry:
+	entry = models.BudgetEntry(
+		amount = amount,
+		budget = budget,
+		category = category,
+		name = name,
+	)
+	db.add(entry)
+	db.commit()
+
+def budget_entry_list_by_budget(db: Session, budget: models.Budget) -> Iterable[models.BudgetEntry]:
+	return db.query(models.BudgetEntry).filter_by(budget_id=budget.id)
+
+def budget_get_by_id(db: Session, budget_id: int) -> models.Budget:
+	return db.query(models.Budget).filter_by(id=budget_id).first()
+
+def budget_history_list_by_budget_id(db: Session, budget_id: int) -> Iterable[models.BudgetHistory]:
+	return db.query(models.BudgetHistory).all()
+
 def category_list(db: Session) -> Iterable[str]:
 	return db.query(models.Transaction.category).all()
 

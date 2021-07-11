@@ -202,6 +202,59 @@ async def budget_create_post(
 		user = db_user)
 	return RedirectResponse(status_code=303, url="/budget")
 	
+@app.get("/budget/{budget_id}/entry/create", response_class=HTMLResponse)
+async def budget_entry_create_get(
+		request: Request,
+		budget_id: int,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
+	budget = crud.budget_get_by_id(db, budget_id)
+	return templates.TemplateResponse("budget-entry-create.html.jinja", {
+		"budget": budget,
+		"request": request,
+		 "user": user})
+
+@app.post("/budget/{budget_id}/entry/create")
+async def budget_entry_create_post(
+		request: Request,
+		budget_id: int,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user),
+		amount: float = Form(...),
+		category: str = Form(...),
+		name: str = Form(...),
+	):
+	db_user = crud.user_get_by_username(db, user.username)
+	budget = crud.budget_get_by_id(db, budget_id)
+	if not budget:
+		raise ValueError("No budget with ID %d", budget_id)
+	crud.budget_entry_create(
+		db = db,
+		amount = amount,
+		budget = budget,
+		category = category,
+		name = name,
+		user = db_user)
+	return RedirectResponse(status_code=303, url=f"/budget/{budget_id}")
+	
+@app.get("/budget/{budget_id}")
+async def budget_get(
+		request: Request,
+		budget_id: int,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
+	db_user = crud.user_get_by_username(db, user.username)
+	budget = crud.budget_get_by_id(db, budget_id)
+	entries = crud.budget_entry_list_by_budget(db, budget)
+	history = crud.budget_history_list_by_budget_id(db, budget_id)
+	return templates.TemplateResponse("budget.html.jinja", {
+		"budget": budget,
+		"current_page": "budget",
+		"entries": entries,
+		"history": history,
+		"request": request,
+		"user": user})
+
 @app.get("/category")
 async def category(request: Request):
 	user = request.session.get("user")

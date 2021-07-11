@@ -72,9 +72,16 @@ class BudgetEntry(Base):
 	__tablename__ = "budget_entry"
 	id = Column(Integer, primary_key=True, index=True)
 	budget_id = Column(Integer, ForeignKey("budget.id"))
-	name = Column(String)
 	amount = Column(Float)
-	
+	category = Column(String, nullable=True)
+	name = Column(String)
+
+	def __init__(self, amount: int, budget: "Budget", category: Optional[str], name: str) -> None:
+		self.amount = amount
+		self.budget_id = budget.id
+		self.category = category
+		self.name = name
+
 class ImportJobStatus(enum.Enum):
 	error = 0
 	started = 1

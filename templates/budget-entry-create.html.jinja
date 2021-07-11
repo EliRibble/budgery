@@ -1,0 +1,43 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/budget", "Budgets"),
+	("/budget/{}".format(budget.id), budget.start_date.isoformat() + " - " + budget.end_date.isoformat()),
+	("/budget/{}".format(budget.id), "Add Item")
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block content %}
+{% if not budget %}
+	<p>Sorry, an budget with that ID does not exist or you don't have access to it.</p>
+{% else %}
+<div class="row">
+	<form class="col s12" action="/budget/{{budget.id}}/entry/create" method="POST">
+		<input type="hidden" name="budget" value="{{budget.id}}"/>
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">attach_money</i>
+				<input placeholder="$1.35" id="amount" name="amount" type="text">
+				<label for="amount">Amount</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">call_made</i>
+				<input placeholder="Bills" name="name" type="text">
+				<label for="name">Name</label>
+			</div>
+		</div>
+		<div class="input-field col s6">
+			<i class="material-icons prefix">tag</i>
+			<input placeholder="Bills" id="category" name="category" type="text">
+			<label for="category">Category</label>
+		</div>
+		<button class="btn waves-effect waves-light" type="submit">Item
+			<i class="material-icons right">send</i>
+		</button>
+	</form>
+</div>
+{% endif %}
+{% endblock %}

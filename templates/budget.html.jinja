@@ -1,0 +1,81 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/budget", "Budgets"),
+	("/budget/{}".format(budget.id), budget.start_date.isoformat() + " - " + budget.end_date.isoformat()),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block onready %}
+var elems = document.querySelectorAll('.fixed-action-btn');
+var instances = M.FloatingActionButton.init(elems, {});
+{% endblock %}
+
+{% block content %}
+{% if not budget %}
+	<p>Sorry, an budget with that ID does not exist or you don't have access to it.</p>
+{% else %}
+<div class="fixed-action-btn">
+  <a class="btn-floating btn-large red" href="/budget/{{budget.id}}/entry/create">
+    <i class="large material-icons">add</i>
+  </a>
+</div>
+
+<table>
+	<thead>
+		<tr>
+			<th>Property</th>
+			<th>Value</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>ID</td><td>{{ budget.id }}</td></tr>
+		<tr><td>Start</td><td>{{ budget.start_date.isoformat() }}</td></tr>
+		<tr><td>End</td><td>{{ budget.end_date.isoformat() }}</td></tr>
+	</tbody>
+</table>
+<table>
+	<thead>
+		<tr>
+			<th>Version</th>
+			<th>When</th>
+			<th>Name</th>
+			<th>Institution</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>0</td>
+			<td>{{ budget.created }}</td>
+			<td></td>
+			<td></td>
+		</tr>
+		{% for entry in history %}
+		<tr>
+			<td>{{ entry.version }}</td>
+			<td>{{ entry.changed }}</td>
+			<td>{{ entry.start_date.isoformat() }}</td>
+			<td>{{ entry.end_date.isoformat() }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<table>
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Amount</th>
+			<th>Category</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for entry in entries %}
+			<tr>
+				<td>{{ entry.name }}</td>
+				<td>{{ entry.amount }}</td>
+				<td>{{ entry.category }}</td>
+			</tr>
+		{% endfor %}
+{% endif %}
+{% endblock %}
