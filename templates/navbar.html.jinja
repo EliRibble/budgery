@@ -10,16 +10,16 @@
 		<li class="logo"><img src="/static/img/budgery-logo.png"></img></li>
 		<h1>Budgery</h1>
 	</div>
-	{{ navelement("account", "/account", "account_balance_wallet", "Accounts") }}
-	{{ navelement("allocation", "/allocation", "donut_small", "Allocations") }}
-	{{ navelement("budget", "/budget", "dashboard", "Budgets") }}
-	{{ navelement("category", "/category", "category", "Categories") }}
-	{{ navelement("institution", "/institution", "account_balance", "Institutions") }}
-	{{ navelement("report", "/report", "assessment", "Reports") }}
-	{{ navelement("sourcinks", "/sourcinks", "swap_horiz", "Sourcinks") }}
-	{{ navelement("tag", "/tag", "tag", "Tags") }}
-	{{ navelement("transaction", "/transaction", "iso", "Transactions") }}
 	{% if user %}
+		{{ navelement("account", "/account", "account_balance_wallet", "Accounts") }}
+		{{ navelement("allocation", "/allocation", "donut_small", "Allocations") }}
+		{{ navelement("budget", "/budget", "dashboard", "Budgets") }}
+		{{ navelement("category", "/category", "category", "Categories") }}
+		{{ navelement("institution", "/institution", "account_balance", "Institutions") }}
+		{{ navelement("report", "/report", "assessment", "Reports") }}
+		{{ navelement("sourcinks", "/sourcinks", "swap_horiz", "Sourcinks") }}
+		{{ navelement("tag", "/tag", "tag", "Tags") }}
+		{{ navelement("transaction", "/transaction", "iso", "Transactions") }}
 		{{ navelement("user", "/user", "account_box", user.name) }}
 	{% else %}
 		{{ navelement("login", "/login", "lock", "Login") }}

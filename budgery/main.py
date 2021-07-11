@@ -1,6 +1,6 @@
 import calendar
 import datetime
-from typing import Mapping, Union
+from typing import Mapping, Optional, Union
 
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, Request, UploadFile
@@ -41,8 +41,10 @@ def get_db():
 	finally:
 		db.close()
 
-def get_user(request: Request) -> User:
+def get_user(request: Request) -> Optional[User]:
 	user_data = request.session.get("user")
+	if user_data is None:
+		return None
 	return _parse_user(user_data)
 
 def _parse_user(user_data: Mapping[str, Union[int, str]]) -> User:
