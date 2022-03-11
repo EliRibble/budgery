@@ -123,7 +123,12 @@ def institution_create(db: Session, user: User, aba_routing_number: int, name: s
 	LOGGER.info("Created %s", institution)
 	return institution
 
-def sourcink_list(db: Session, user: models.User) -> Iterable[models.Sourcink]:
+def sourcink_list(
+		db: Session,
+		user: models.User,
+		name: str = "") -> Iterable[models.Sourcink]:
+	if name:
+		return db.query(models.Sourcink).filter(models.Sourcink.name.like("%" + name + "%")).all()
 	return db.query(models.Sourcink).all()
 
 def sourcink_get_or_create(

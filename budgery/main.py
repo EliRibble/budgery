@@ -347,14 +347,15 @@ async def report(request: Request, user: User = Depends(get_user)):
 		"request": request,
 		"user": user})
 
-@app.get("/sourcinks", response_class=HTMLResponse)
+@app.get("/sourcink", response_class=HTMLResponse)
 async def sourcinks_list_get(
 		request: Request,
 		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		user: User = Depends(get_user),
+		name: str = ""):
 	"Get list of sourcinks."
 	db_user = crud.user_get_by_username(db, user.username)
-	sourcinks = crud.sourcink_list(db, db_user)
+	sourcinks = crud.sourcink_list(db, db_user, name=name)
 	sourcinks = sorted(sourcinks, key=lambda s: s.name)
 	return templates.TemplateResponse("sourcink-list.html.jinja", {
 		"request": request,
