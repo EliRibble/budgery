@@ -140,7 +140,7 @@ async def account_edit_post(
 
 @app.route("/allocation")
 async def allocation(request: Request, user: User = Depends(get_user)):
-	return templates.TemplateResponse("allocation.html.jinja", {
+	return templates.TemplateResponse("allocation-list.html.jinja", {
 		"current_page": "allocation",
 		"request": request,
 		"user": user})

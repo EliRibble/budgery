@@ -1,6 +1,10 @@
 {% extends "base.html.jinja" %}
 {% block content %}
-{% if accounts %}
+<p>Allocations are like sub-accounts where you can label money that is awaiting a
+particular purpose. Think "this money is for our down payment" or "savings for my
+annual car insurance payment".
+</p>
+{% if allocations %}
 	<table>
 		<thead>
 			<tr>
@@ -15,6 +19,6 @@
 		</tbody>
 	</table>
 {% else %}
-	<p>No accounts yet, please <a href="/accounts/create">create one</a></p>
+	<p>No allocations yet, please <a href="/allocation/create">create one</a></p>
 {% endif %}
 {% endblock %}
