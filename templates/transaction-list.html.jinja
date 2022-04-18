@@ -6,6 +6,14 @@
 {% include "fragments/breadcrumb.html.jinja" %}
 {% endblock %}
 {% block content %}
+<div class="row">
+	<div class="col s6">
+		<a class="btn-small waves-effect waves-light" href="/transaction/create"><i class="material-icons left">add</i>Create</a>
+	</div>
+	<div class="col s6">
+		<a class="btn-small waves-effect waves-light green" href="/import"><i class="material-icons left">import_export</i>Import</a>
+	</div>
+</div>
 {% if transactions %}
 <div class="row">
 	<table>
@@ -32,12 +40,4 @@
 {% else %}
 	<p>No transactions yet, please <a href="/transaction/create">create one</a></p>
 {% endif %}
-<div class="row">
-	<div class="col s6">
-		<a class="btn-small waves-effect waves-light" href="/transaction/create"><i class="material-icons left">add</i>Create</a>
-	</div>
-	<div class="col s6">
-		<a class="btn-small waves-effect waves-light green" href="/import"><i class="material-icons left">import_export</i>Import</a>
-	</div>
-</div>
 {% endblock %}
