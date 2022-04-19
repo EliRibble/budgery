@@ -275,7 +275,13 @@ async def logout(request: Request):
 
 @app.get("/import")
 async def import_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
-	return templates.TemplateResponse("import-create.html.jinja", {
+	db_user = crud.user_get_by_username(db, user.username)
+	imports = crud.import_job_list(
+		db = db,
+		user = db_user,
+	)
+	return templates.TemplateResponse("import-list.html.jinja", {
+		"imports": imports,
 		"request": request,
 		"user": user,
 	})

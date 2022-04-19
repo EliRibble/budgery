@@ -107,6 +107,12 @@ def import_job_finish(db: Session, import_job: models.ImportJob) -> None:
 	import_job.status = models.ImportJobStatus.finished
 	db.commit()
 
+def import_job_list(
+		db: Session,
+		user: models.User,
+		name: str = "") -> Iterable[models.ImportJob]:
+	return db.query(models.ImportJob).order_by(models.ImportJob.created).all()
+
 def institution_get_by_name(db: Session, name: str) -> models.Institution:
 	return db.query(models.Institution).filter(name==name).first()
 
