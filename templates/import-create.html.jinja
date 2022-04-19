@@ -6,9 +6,26 @@
 {% include "fragments/breadcrumb.html.jinja" %}
 {% endblock %}
 
+{% block onready %}
+var element = document.getElementById("account");
+M.Autocomplete.init(element, {
+	data: {
+		{% for account in accounts %}
+			"{{ account.name }}": null,
+		{% endfor %}
+	}
+});
+{% endblock %}
+
 {% block content %}
 <div class="row">
 	<form class="col s12" action="/import/create" method="POST" enctype="multipart/form-data">
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">account_balance</i>
+				<input placeholder="Bank of the Internet" id="account" name="account_name" type="text" class="autocomplete">
+			</div>
+		</div>
 		<div class="row">
 			<div class="input-field col s6">
 				<input id="csv_file" name="csv_file" type="file">

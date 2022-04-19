@@ -286,6 +286,18 @@ async def import_get(request: Request, db: Session = Depends(get_db), user: User
 		"user": user,
 	})
 
+@app.get("/import/create")
+async def import_create_get(request: Request,
+	db: Session = Depends(get_db),
+	user: User = Depends(get_user)):
+	db_user = crud.user_get_by_username(db, user.username)
+	accounts = crud.account_list(db, db_user)
+	return templates.TemplateResponse("import-create.html.jinja", {
+		"accounts": accounts,
+		"request": request,
+		"user": user,
+	})
+
 @app.post("/import/create")
 async def import_create_post(
 		request: Request,
