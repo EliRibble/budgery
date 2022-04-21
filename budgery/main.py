@@ -292,8 +292,11 @@ async def import_create_get(request: Request,
 	user: User = Depends(get_user)):
 	db_user = crud.user_get_by_username(db, user.username)
 	accounts = crud.account_list(db, db_user)
+	institutions = crud.institution_list(db)
+	institutions_by_id = {institution.id: institution for institution in institutions}
 	return templates.TemplateResponse("import-create.html.jinja", {
 		"accounts": accounts,
+		"institutions_by_id": institutions_by_id,
 		"request": request,
 		"user": user,
 	})
