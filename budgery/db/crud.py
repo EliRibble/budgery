@@ -93,8 +93,9 @@ def category_list(db: Session) -> Iterable[str]:
 def create_tables(db: Session):
 	models.Base.metadata.create_all(bind=db)
 
-def import_job_create(db: Session, filename: str, user: models.User) -> models.ImportJob:
+def import_job_create(account_id: int, db: Session, filename: str, user: models.User) -> models.ImportJob:
 	job = models.ImportJob(
+		account_id = account_id,
 		filename = filename,
 		status = models.ImportJobStatus.started,
 		user = user,

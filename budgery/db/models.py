@@ -91,6 +91,7 @@ class ImportJob(Base):
 	"A background task to import a large set of transactions."
 	__tablename__ = "import_job"
 	id = Column(Integer, primary_key=True, index=True)
+	account_id = Column(Integer, ForeignKey("account.id"), nullable=True)
 	created = Column(DateTime, default=datetime.datetime.now)
 	filename = Column(String)
 	status = Column(Enum(ImportJobStatus))

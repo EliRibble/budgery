@@ -305,12 +305,14 @@ async def import_create_get(request: Request,
 async def import_create_post(
 		request: Request,
 		background_tasks: BackgroundTasks,
+		account_id: int,
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user),
 		csv_file: UploadFile = File(...),
 	):
 	db_user = crud.user_get_by_username(db, user.username)
 	import_job = crud.import_job_create(
+		account_id = account_id,
 		db = db,
 		filename = csv_file.filename,
 		user = db_user,
