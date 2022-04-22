@@ -395,6 +395,23 @@ async def sourcinks_list_get(
 		"user": user,
 	})
 	
+@app.get("/sourcink/{sourcink_id}", response_class=HTMLResponse)
+async def sourcinks_get(
+		request: Request,
+		sourcink_id: int,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user),
+		name: str = ""):
+	"Get a specific sourcink."
+	db_user = crud.user_get_by_username(db, user.username)
+	sourcink = crud.sourcink_get_by_id(db, db_user, sourcink_id)
+	return templates.TemplateResponse("sourcink.html.jinja", {
+		"current_page": "sourcink",
+		"request": request,
+		"sourcink": sourcink,
+		"user": user,
+	})
+	
 @app.get("/tag")
 async def tag(request: Request, user: User = Depends(get_user)):
 	return templates.TemplateResponse("tag.html.jinja", {

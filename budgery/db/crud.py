@@ -150,6 +150,13 @@ def sourcink_list(
 		return db.query(models.Sourcink).filter(models.Sourcink.name.like("%" + name + "%")).all()
 	return db.query(models.Sourcink).all()
 
+def sourcink_get_by_id(
+		db: Session,
+		user: User,
+		sourcink_id: int,
+	) -> models.Sourcink:
+	return db.query(models.Sourcink).filter_by(id=sourcink_id).first()
+
 def sourcink_get_or_create(
 		db: Session,
 		name: str,

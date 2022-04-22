@@ -1,0 +1,27 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/sourcink", "Sourcinks"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block content %}
+{% if not sourcink %}
+	<p>Sorry, an sourcink with that ID does not exist or you don't have access to it.</p>
+{% else %}
+<a href="/sourcink/{{ sourcink.id }}/edit">Edit</a>
+<table>
+	<thead>
+		<tr>
+			<th>Property</th>
+			<th>Value</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>ID</td><td>{{ sourcink.id }}</td></tr>
+		<tr><td>Name</td><td>{{ sourcink.name }}</td></tr>
+	</tbody>
+</table>
+{% endif %}
+{% endblock %}
