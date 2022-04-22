@@ -29,7 +29,7 @@
 			{% for txn in transactions %}
 				<tr>
 					<td><a href="/transaction/{{ txn.id }}">{{ txn.id }}</a></td>
-					<td>{{ txn.amount }}</td>
+					<td>{{ txn.amount|currency }}</td>
 					<td>{{ txn.category }}</td>
 					<td>{{ txn.at }}</td>
 				</tr>
