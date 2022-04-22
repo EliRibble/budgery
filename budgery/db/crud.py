@@ -184,7 +184,7 @@ def transaction_get_by_id(db: Session, transaction_id: int) -> models.Transactio
 	return db.query(models.Transaction).filter_by(id=transaction_id).first()
 
 def transaction_list(db: Session):
-	return db.query(models.Transaction).all()
+	return db.query(models.Transaction).order_by(models.Transaction.at.desc()).all()
 
 def user_ensure_exists(db: Session, user: User) -> None:
 	existing = user_get_by_username(db, user.username)
