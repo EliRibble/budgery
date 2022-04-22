@@ -139,27 +139,36 @@ class Transaction(Base):
 	__tablename__ = "transaction"
 
 	id = Column(Integer, primary_key=True, index=True)
+	account_id_from = Column(Integer, ForeignKey("account.id", name="fk_account_id_from"), nullable=True)
+	account_id_to = Column(Integer, ForeignKey("account.id", name="fk_account_id_to"), nullable=True)
 	amount = Column(Float)
 	at = Column(DateTime())
 	budget_entry = Column(Integer, ForeignKey("budget_entry.id", name="fk_budget_entry_id"), nullable=True)
+	description = Column(String(), nullable=True)
 	category = Column(String(), nullable=True)
 	import_job_id = Column(Integer, ForeignKey("import_job.id", name="fk_import_job_id"), nullable=True)
 	sourcink_id_from = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_from"), nullable=True)
 	sourcink_id_to = Column(Integer, ForeignKey("sourcink.id", name="fk_sourcink_id_to"), nullable=True)
 
 	def __init__(self,
+		account_id_from: Optional[int],
+		account_id_to: Optional[int],
 		amount: float,
 		at: datetime.datetime,
+		description: str,
 		sourcink_from: Sourcink,
 		sourcink_to: Sourcink,
 		budget_entry: Optional[BudgetEntry] = None,
 		category: Optional[str] = None,
 		import_job: Optional[ImportJob] = None,
 	) -> None:
+		self.account_id_from = account_id_from
+		self.account_id_to = account_id_to
 		self.amount = amount
 		self.at = at
 		self.budget_entry = budget_entry
 		self.category = category
+		self.description = description
 		self.import_job = import_job
 		self.sourcink_from = sourcink_from
 		self.sourcink_to = sourcink_to

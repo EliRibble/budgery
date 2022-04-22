@@ -305,7 +305,7 @@ async def import_create_get(request: Request,
 async def import_create_post(
 		request: Request,
 		background_tasks: BackgroundTasks,
-		account_id: int,
+		account_id: int = Form(...),
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user),
 		csv_file: UploadFile = File(...),

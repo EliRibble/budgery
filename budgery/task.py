@@ -7,7 +7,63 @@ import logging
 from budgery.db import crud
 
 LOGGER = logging.getLogger(__name__)
-HEADER = [
+
+def _import_everydollar_transaction(account_id: int, data, db, import_job, user) -> None:
+	"Process a single line of an Every Dollar CSV."
+	at = datetime.datetime.fromisoformat(data["date"])
+	amount = float(data["amount"])
+	category = data["description"]
+	sourcink_name_from = data["source_name"]
+	sourcink_name_to = data["destination_name"]
+	sourcink_from = crud.sourcink_get_or_create(db, sourcink_name_from)
+	sourcink_to = crud.sourcink_get_or_create(db, sourcink_name_to)
+	crud.transaction_create(
+		db=db,
+		amount=amount,
+		at=at,
+		category=category,
+		import_job=import_job,
+		sourcink_from=sourcink_from,
+		sourcink_to=sourcink_to,
+	)
+
+def _import_ally_transaction(
+	account_id: int,
+	data,
+	db,
+	import_job,
+	user) -> None:
+	"Process a single line of an Ally Bank CSV."
+	date = datetime.date.fromisoformat(data["Date"])
+	time = datetime.time.fromisoformat(data["Time"])
+	at = datetime.datetime.combine(date, time)
+	amount = float(data["Amount"])
+	description = data["Description"]
+	sourcink_unknown = crud.sourcink_get_or_create(db, "Unknown")
+	type_ = data["Type"]
+	if type_ == "Withdrawal":
+		account_id_from = account_id
+		account_id_to = None
+	elif type_ == "Deposit":
+		account_id_from = None
+		account_id_to = account_id
+	else:
+		raise Exception(f"Unknown type {type_}")
+
+	crud.transaction_create(
+		db=db,
+		description=description,
+		account_id_from=account_id_from,
+		account_id_to=account_id_to,
+		amount=amount,
+		at=at,
+		category=None,
+		import_job=import_job,
+		sourcink_from=sourcink_unknown,
+		sourcink_to=sourcink_unknown,
+	)
+
+HEADER_TO_PROCESSOR = {(
 	"user_id",
 	"group_id",
 	"journal_id",
@@ -57,7 +113,13 @@ HEADER = [
 	"original_source",
 	"recurrence_total",
 	"recurrence_count",
-]
+): _import_everydollar_transaction, (
+	"Date",
+	" Time",
+	" Amount",
+	" Type",
+	" Description",
+): _import_ally_transaction}
 
 async def process_transaction_upload(
 		csv_file,
@@ -67,18 +129,18 @@ async def process_transaction_upload(
 	) -> None:
 	await asyncio.sleep(0)
 	reader = csv.reader(codecs.iterdecode(csv_file.file, "UTF-8"), delimiter=",", quotechar="\"")
-	header = None
+	header = tuple(next(reader))
+	processor = None
+	for header_pattern, p in HEADER_TO_PROCESSOR.items():
+		if header == header_pattern:
+			processor = p
+	if not processor:
+		raise Exception(f"No header pattern found that matches {header}")
+
 	for n, row in enumerate(reader):
-		if not header:
-			header = row
-			for i, val in enumerate(HEADER):
-				if not row[i] == val:
-					raise ValueError(
-						"Header is not what we expected at column {} ({})".format(
-							i, val))
-			continue
-		data = {header[i]: row[i] for i in range(len(header))}
-		_import_transaction(
+		data = {header[i].strip(): row[i] for i in range(len(header))}
+		processor(
+			account_id=import_job.account_id,
 			data=data,
 			db=db,
 			import_job=import_job,
@@ -86,21 +148,3 @@ async def process_transaction_upload(
 		)
 		LOGGER.info("Handled row %d", n)
 	crud.import_job_finish(db, import_job)
-	
-def _import_transaction(data, db, import_job, user) -> None:
-	at = datetime.datetime.fromisoformat(data["date"])
-	amount = float(data["amount"])
-	category = data["description"]
-	sourcink_name_from = data["source_name"]
-	sourcink_name_to = data["destination_name"]
-	sourcink_from = crud.sourcink_get_or_create(db, sourcink_name_from)
-	sourcink_to = crud.sourcink_get_or_create(db, sourcink_name_to)
-	crud.transaction_create(
-		db=db,
-		amount=amount,
-		at=at,
-		category=category,
-		import_job=import_job,
-		sourcink_from=sourcink_from,
-		sourcink_to=sourcink_to,
-	)

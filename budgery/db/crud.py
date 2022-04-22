@@ -155,17 +155,23 @@ def sourcink_get_or_create(
 
 def transaction_create(
 		db: Session,
+		account_id_from: Optional[int],
+		account_id_to: Optional[int],
 		amount: float,
 		at: datetime.datetime,
 		category: str,
+		description: str,
 		sourcink_from: models.Sourcink,
 		sourcink_to: models.Sourcink,
 		import_job: Optional[models.ImportJob],
 	) -> models.Transaction:
 	transaction = models.Transaction(
+		account_id_from=account_id_from,
+		account_id_to=account_id_to,
 		amount=amount,
 		at=at,
 		category=category,
+		description=description,
 		import_job=import_job,
 		sourcink_from=sourcink_from,
 		sourcink_to=sourcink_to,
