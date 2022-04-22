@@ -1,20 +1,20 @@
 {% extends "base.html.jinja" %}
 {% block content %}
-{% if accounts %}
+{% if not categories %}
+	<p>No categories yet, you'll see entries here when you creat <a href="/transactions">transactions</a></p>
+{% else %}
 	<table>
 		<thead>
 			<tr>
-				<th>ID</th>
-				<th>Amount</th>
+				<th>Name</th>
+				<th>Transactions</th>
 			</tr>
 		</thead>
 		<tbody>
-			{% for txn in transactions %}
-				<tr><td>{{ txn.id }}</td><td>{{ txn.amount }}</td></tr>
+			{% for category in categories %}
+				<tr><td>{{ category.name }}</td><td>{{ category.transaction_count }}</td></tr>
 			{% endfor %}
 		</tbody>
 	</table>
-{% else %}
-	<p>No accounts yet, please <a href="/accounts/create">create one</a></p>
 {% endif %}
 {% endblock %}

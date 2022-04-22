@@ -260,9 +260,14 @@ async def budget_get(
 		"user": user})
 
 @app.get("/category")
-async def category(request: Request):
+async def category_list_get(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
 	user = request.session.get("user")
+	categories = crud.category_list(db, user)
 	return templates.TemplateResponse("category.html.jinja", {
+		"categories": categories,
 		"current_page": "category",
 		"request": request,
 		"user": user})

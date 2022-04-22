@@ -1,7 +1,9 @@
+import dataclasses
 import datetime
 import logging
 from typing import Iterable, Optional
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from budgery.db import models
@@ -10,6 +12,11 @@ from budgery.user import User
 
 
 LOGGER = logging.getLogger(__name__)
+
+@dataclasses.dataclass
+class Category:
+	name: str
+	transaction_count: int
 
 def account_create(db: Session, institution_id: int, name: str, user: models.User) -> models.Account:
 	account = models.Account(
@@ -87,8 +94,13 @@ def budget_get_by_id(db: Session, budget_id: int) -> models.Budget:
 def budget_history_list_by_budget_id(db: Session, budget_id: int) -> Iterable[models.BudgetHistory]:
 	return db.query(models.BudgetHistory).all()
 
-def category_list(db: Session) -> Iterable[str]:
-	return db.query(models.Transaction.category).all()
+def category_list(db: Session, user: models.User) -> Iterable[Category]:
+	rows = db.query(
+		models.Transaction.category,
+		func.count(),
+	).group_by(models.Transaction.category)
+	return [Category(row[0], row[1]) for row in rows]
+		
 
 def create_tables(db: Session):
 	models.Base.metadata.create_all(bind=db)
