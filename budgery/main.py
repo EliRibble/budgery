@@ -405,9 +405,13 @@ async def tag(request: Request, user: User = Depends(get_user)):
 @app.get("/transaction", response_class=HTMLResponse)
 async def transaction_list_get(
 		request: Request,
+		category: Optional[str] = None,
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user)):
-	transactions = crud.transaction_list(db)
+	transactions = crud.transaction_list(
+		category=category,
+		db=db,
+	)
 	return templates.TemplateResponse("transaction-list.html.jinja", {
 		"current_page": "transaction",
 		"request": request,
