@@ -21,9 +21,10 @@
 	</thead>
 	<tbody>
 		<tr><td>ID</td><td>{{ transaction.id }}</td></tr>
-		<tr><td>Amount</td><td>{{ transaction.amount }}</td></tr>
-		<tr><td>Date</td><td>{{ transaction.at }}</td></tr>
+		<tr><td>Amount</td><td>{{ transaction.amount|currency }}</td></tr>
 		<tr><td>Category</td><td>{{ transaction.category }}</td></tr>
+		<tr><td>Date</td><td>{{ transaction.at }}</td></tr>
+		<tr><td>Description</td><td>{{ transaction.description }}</td></tr>
 		<tr>
 			<td>From</td>
 			<td><a href="/sourcink/{{ transaction.sourcink_id_from }}">

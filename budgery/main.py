@@ -12,7 +12,7 @@ from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 
-from budgery import task
+from budgery import custom_filters, task
 from budgery.db import connection as db_connection
 from budgery.db import crud
 from budgery.user import User
@@ -25,6 +25,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
 oauth = OAuth(config)
 templates = Jinja2Templates(directory="templates") 
+templates.env.filters["currency"] = custom_filters.currency
 
 oauth.register(
 	name="keycloak",
