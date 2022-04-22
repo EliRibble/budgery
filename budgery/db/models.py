@@ -97,7 +97,11 @@ class ImportJob(Base):
 	status = Column(Enum(ImportJobStatus))
 	user_id = Column(Integer, ForeignKey("user.id"))
 
-	def __init__(self, filename: str, status: ImportJobStatus, user: "User") -> None:
+	def __init__(self,
+		account_id: int,
+		filename: str,
+		status: ImportJobStatus,
+		user: "User") -> None:
 		self.filename = filename
 		self.status = status
 		self.user = user

@@ -103,7 +103,10 @@ async def accounts_create_post(
 	return RedirectResponse(status_code=303, url="/account")
 
 @app.get("/account/{account_id}")
-async def account_get(request: Request, account_id: int, db: Session = Depends(get_db), user: User = Depends(get_user)):
+async def account_get(request: Request,
+	account_id: int,
+	db: Session = Depends(get_db),
+	user: User = Depends(get_user)):
 	account = crud.account_get_by_id(db, account_id)
 	history = crud.account_history_list_by_account_id(db, account_id)
 	return templates.TemplateResponse("account.html.jinja", {
