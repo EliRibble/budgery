@@ -12,7 +12,7 @@ from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 
-from budgery import custom_filters, task
+from budgery import custom_filters, dates, task
 from budgery.db import connection as db_connection
 from budgery.db import crud
 from budgery.user import User
@@ -179,10 +179,8 @@ async def budget_create_get(
 		request: Request,
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user)):
-	default_end_date = datetime.date.today()
-	default_end_date = default_end_date.replace(
-		day=calendar.monthrange(default_end_date.year, default_end_date.month)[1])
-	default_start_date = datetime.date.today().replace(day=1)
+	default_end_date = dates.this_month_end()
+	default_start_date = dates.this_month_start()
 	return templates.TemplateResponse("budget-create.html.jinja", {
 		"default_end_date": default_end_date,
 		"default_start_date": default_start_date,
@@ -422,26 +420,24 @@ async def tag(request: Request, user: User = Depends(get_user)):
 @app.get("/transaction", response_class=HTMLResponse)
 async def transaction_list_get(
 		request: Request,
+		at_end: Optional[str] = None,
+		at_start: Optional[str] = None,
 		category: Optional[str] = None,
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user)):
 
-	at = None
-	if not category:
-		default_start_date = datetime.date.today()
-		default_start_date = default_start_date.replace(
-			day=calendar.monthrange(default_start_date.year, default_start_date.month)[1])
-		default_start_date = datetime.date.today().replace(day=1)
-		at = crud.DatetimeRange(
-			end=None,
-			start=default_start_date,
-		)
+	at = crud.DatetimeRange(
+		end=dates.parse(at_end) if at_end else None,
+		start=dates.parse(at_start) if at_start else dates.this_month_start(),
+	)
 	transactions = crud.transaction_list(
 		at=at,
 		category=category,
 		db=db,
 	)
 	return templates.TemplateResponse("transaction-list.html.jinja", {
+		"at": at,
+		"category": category,
 		"current_page": "transaction",
 		"request": request,
 		"transactions": transactions,

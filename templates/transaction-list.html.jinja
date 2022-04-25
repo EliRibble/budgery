@@ -7,12 +7,26 @@
 {% endblock %}
 {% block content %}
 <div class="row">
-	<div class="col s6">
+	<div class="col s3">
 		<a class="btn-small waves-effect waves-light" href="/transaction/create"><i class="material-icons left">add</i>Create</a>
 	</div>
-	<div class="col s6">
+	<div class="col s3">
 		<a class="btn-small waves-effect waves-light green" href="/import"><i class="material-icons left">import_export</i>Import</a>
 	</div>
+	<div class="col s3">
+		<a class="btn-small waves-effect waves-light orange" href="/transaction/rule"><i class="material-icons left">computer</i>Rules</a>
+	</div>
+</div>
+<div class="row">
+	<form class="col s12" action="/transaction" method="GET">
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">assignment</i>
+				<input name="at_start" value="{{at.start}}" type="text"/>
+				<label for="at_start">From date</label>
+			</div>
+		</div
+	</form>
 </div>
 {% if transactions %}
 <div class="row">
