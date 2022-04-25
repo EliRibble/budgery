@@ -14,6 +14,11 @@ from budgery.user import User
 LOGGER = logging.getLogger(__name__)
 
 @dataclasses.dataclass
+class DatetimeRange:
+	end: Optional[datetime.datetime]
+	start: Optional[datetime.datetime]
+
+@dataclasses.dataclass
 class Category:
 	name: str
 	transaction_count: int
@@ -202,12 +207,20 @@ def transaction_create(
 def transaction_get_by_id(db: Session, transaction_id: int) -> models.Transaction:
 	return db.query(models.Transaction).filter_by(id=transaction_id).first()
 
-def transaction_list(db: Session, category: Optional[str] = None):
+def transaction_list(db: Session,
+		category: Optional[str] = None,
+		at: Optional[DatetimeRange] = None,
+	):
 	query = db.query(models.Transaction).order_by(models.Transaction.at.desc())
 	if category == "None":
 		query = query.filter_by(category=None)
 	elif category:
 		query = query.filter_by(category=category)
+	if at:
+		if at.end:
+			query = query.filter(models.Transaction.at <= at.end)
+		if at.start:
+			query = query.filter(models.Transaction.at >= at.start)
 	
 	return query.all()
 

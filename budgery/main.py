@@ -425,7 +425,19 @@ async def transaction_list_get(
 		category: Optional[str] = None,
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user)):
+
+	at = None
+	if not category:
+		default_start_date = datetime.date.today()
+		default_start_date = default_start_date.replace(
+			day=calendar.monthrange(default_start_date.year, default_start_date.month)[1])
+		default_start_date = datetime.date.today().replace(day=1)
+		at = crud.DatetimeRange(
+			end=None,
+			start=default_start_date,
+		)
 	transactions = crud.transaction_list(
+		at=at,
 		category=category,
 		db=db,
 	)
