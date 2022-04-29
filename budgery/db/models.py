@@ -68,7 +68,7 @@ class BudgetPermission(Base):
 		self.type = type
 		self.user = user
 
-class BudgetEntry(Base):
+class BudgetEntry(Versioned, Base):
 	"""A line in a budget.
 
 	The amount should be positive if this represents income, negative

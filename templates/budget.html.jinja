@@ -40,32 +40,6 @@ var instances = M.FloatingActionButton.init(elems, {});
 <table>
 	<thead>
 		<tr>
-			<th>Version</th>
-			<th>When</th>
-			<th>Name</th>
-			<th>Institution</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td>0</td>
-			<td>{{ budget.created }}</td>
-			<td></td>
-			<td></td>
-		</tr>
-		{% for entry in history %}
-		<tr>
-			<td>{{ entry.version }}</td>
-			<td>{{ entry.changed }}</td>
-			<td>{{ entry.start_date.isoformat() }}</td>
-			<td>{{ entry.end_date.isoformat() }}</td>
-		</tr>
-		{% endfor %}
-	</tbody>
-</table>
-<table>
-	<thead>
-		<tr>
 			<th>Name</th>
 			<th>Amount</th>
 			<th>Category</th>
