@@ -1,0 +1,9 @@
+{% macro color_net_amount(value) -%}
+{% if value > 0 %}
+	<span class="net high">{{ value|currency }}</span>
+{% elif value < 0 %}
+	<span class="net low">{{ value|currency }}</span>
+{% else %}
+	<span class="net zero">{{ value|currency }}</span>
+{% endif %}
+{%- endmacro %}

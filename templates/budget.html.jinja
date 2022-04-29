@@ -1,4 +1,5 @@
 {% extends "base.html.jinja" %}
+{% from "macros/net.html.jinja" import color_net_amount %}
 {% set breadcrumbs = [
 	("/budget", "Budgets"),
 	("/budget/{}".format(budget.id), budget.start_date.isoformat() + " - " + budget.end_date.isoformat()),
@@ -33,6 +34,7 @@ var instances = M.FloatingActionButton.init(elems, {});
 		<tr><td>ID</td><td>{{ budget.id }}</td></tr>
 		<tr><td>Start</td><td>{{ budget.start_date.isoformat() }}</td></tr>
 		<tr><td>End</td><td>{{ budget.end_date.isoformat() }}</td></tr>
+		<tr><td>Net</td><td>{{ color_net_amount(net) }}</td></tr>
 	</tbody>
 </table>
 <table>

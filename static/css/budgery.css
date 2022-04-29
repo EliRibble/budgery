@@ -37,3 +37,13 @@ nav .breadcrumb {
 nav .nav-wrapper {
 	padding-top: 40px;
 }
+
+.net.high {
+	color: purple;
+}
+.net.low {
+	color: red;
+}
+.net.zero {
+	color: green;
+}

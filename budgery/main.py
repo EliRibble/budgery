@@ -256,11 +256,13 @@ async def budget_get(
 	budget = crud.budget_get_by_id(db, budget_id)
 	entries = crud.budget_entry_list_by_budget(db, budget)
 	history = crud.budget_history_list_by_budget_id(db, budget_id)
+	net = sum(entry.amount for entry in entries)
 	return templates.TemplateResponse("budget.html.jinja", {
 		"budget": budget,
 		"current_page": "budget",
 		"entries": entries,
 		"history": history,
+		"net": net,
 		"request": request,
 		"user": user})
 
