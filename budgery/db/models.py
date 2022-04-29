@@ -69,6 +69,11 @@ class BudgetPermission(Base):
 		self.user = user
 
 class BudgetEntry(Base):
+	"""A line in a budget.
+
+	The amount should be positive if this represents income, negative
+	for expense.
+	"""
 	__tablename__ = "budget_entry"
 	id = Column(Integer, primary_key=True, index=True)
 	budget_id = Column(Integer, ForeignKey("budget.id"))

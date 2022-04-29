@@ -224,12 +224,19 @@ async def budget_entry_create_post(
 		user: User = Depends(get_user),
 		amount: float = Form(...),
 		category: str = Form(...),
+		entry_type: str = Form(...),
 		name: str = Form(...),
 	):
 	db_user = crud.user_get_by_username(db, user.username)
 	budget = crud.budget_get_by_id(db, budget_id)
 	if not budget:
 		raise ValueError("No budget with ID %d", budget_id)
+	if amount < 0:
+		raise ValueError(f"Don't supply negative values like '{amount}', use 'entry_type' instead.")
+	if entry_type == "expense":
+		amount = amount * -1
+	elif entry_type != "income":
+		raise ValueError(f"entry_type must be either 'expense' or 'income'. You gave '{entry_type}'")
 	crud.budget_entry_create(
 		db = db,
 		amount = amount,

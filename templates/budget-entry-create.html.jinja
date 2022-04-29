@@ -8,6 +8,11 @@
 {% include "fragments/breadcrumb.html.jinja" %}
 {% endblock %}
 
+{% block onready %}
+var elems = document.querySelectorAll("select");
+var instances = M.FormSelect.init(elems, {});
+{% endblock %}
+
 {% block content %}
 {% if not budget %}
 	<p>Sorry, an budget with that ID does not exist or you don't have access to it.</p>
@@ -20,6 +25,13 @@
 				<i class="material-icons prefix">attach_money</i>
 				<input placeholder="$1.35" id="amount" name="amount" type="text">
 				<label for="amount">Amount</label>
+			</div>
+			<div class="input-field col s6">
+				<i class="material-icons prefix">exposure</i>
+				<select name="entry_type">
+					<option selected value="expense">Expense</option>
+					<option value="income">Income</option>
+				<select>
 			</div>
 		</div>
 		<div class="row">
