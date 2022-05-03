@@ -276,10 +276,12 @@ async def budget_entry_get(
 	db_user = crud.user_get_by_username(db, user.username)
 	budget = crud.budget_get_by_id(db, budget_id)
 	entry = crud.budget_entry_get_by_id(db, entry_id)
+	history = crud.budget_entry_history_list_by_id(db, entry_id)
 	return templates.TemplateResponse("budget-entry.html.jinja", {
 		"budget": budget,
 		"current_page": "budget",
 		"entry": entry,
+		"history": history,
 		"request": request,
 		"user": user})
 

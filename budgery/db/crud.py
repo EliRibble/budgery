@@ -94,14 +94,38 @@ def budget_entry_create(
 def budget_entry_get_by_id(db: Session, entry_id: int) -> models.BudgetEntry:
 	return db.query(models.BudgetEntry).filter_by(id=entry_id).first()
 
+def budget_entry_history_list_by_id(db: Session, entry_id: int) -> Iterable[models.BudgetEntryHistory]:
+	return db.query(models.BudgetEntryHistory).where(models.BudgetEntryHistory.id == entry_id).all()
+
 def budget_entry_list_by_budget(db: Session, budget: models.Budget) -> Iterable[models.BudgetEntry]:
 	return db.query(models.BudgetEntry).filter_by(budget_id=budget.id)
+
+def budget_entry_update(
+		db: Session,
+		amount: float,
+		category: str,
+		entry_id: int,
+		name: str,
+		user: models.User) -> None:
+	# query = update(models.BudgetEntry).values({
+		# models.BudgetEntry.amount: amount,
+		# models.BudgetEntry.category: category,
+		# models.BudgetEntry.name: name,
+	# }).where(
+		# models.BudgetEntry.id == entry_id,
+	# )
+	# db.execute(query)
+	entry = budget_entry_get_by_id(db, entry_id)
+	entry.amount = amount
+	entry.category = category
+	entry.name = name
+	db.commit()
 
 def budget_get_by_id(db: Session, budget_id: int) -> models.Budget:
 	return db.query(models.Budget).filter_by(id=budget_id).first()
 
 def budget_history_list_by_budget_id(db: Session, budget_id: int) -> Iterable[models.BudgetHistory]:
-	return db.query(models.BudgetHistory).all()
+	return db.query(models.BudgetHistory).where(models.BudgetHistory.id == budget_id).all()
 
 def category_list(db: Session, user: models.User) -> Iterable[Category]:
 	rows = db.query(

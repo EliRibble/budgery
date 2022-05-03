@@ -16,16 +16,28 @@
 <table>
 	<thead>
 		<tr>
-			<th>Property</th>
-			<th>Value</th>
+			<th>Version</th>
+			<th>When</th>
+			<th>Name</th>
+			<th>Institution</th>
 		</tr>
 	</thead>
 	<tbody>
-		<tr><td>ID</td><td>{{ entry.id }}</td></tr>
-		<tr><td>Name</td><td>{{ entry.name }}</td></tr>
-		<tr><td>Category</td><td>{{ entry.category }}</td></tr>
-		<tr><td>Amount</td><td>{{ entry.amount }}</td></tr>
+		<tr>
+			<td>0</td>
+			<td>{{ entry.created }}</td>
+			<td></td>
+			<td></td>
+		</tr>
+		{% for h in history %}
+		<tr>
+			<td>{{ h.version }}</td>
+			<td>{{ h.changed }}</td>
+			<td>{{ h.name }}</td>
+			<td>{{ h.category }}</td>
+			<td>{{ h.amount }}</td>
+		</tr>
+		{% endfor %}
 	</tbody>
 </table>
-{% endif %}
 {% endblock %}
