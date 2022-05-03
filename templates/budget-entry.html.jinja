@@ -38,14 +38,23 @@ var instances = M.FormSelect.init(elems, {});
 		</div>
 		<div class="input-field col s6">
 			<i class="material-icons prefix">attach_money</i>
-			<input id="amount" name="amount" type="text" value="{{entry.amount}}"/>
+			{% if entry.amount >= 0 %}
+				<input id="amount" name="amount" type="text" value="{{entry.amount}}"/>
+			{% else %}
+				<input id="amount" name="amount" type="text" value="{{(-1.0) * entry.amount}}"/>
+			{% endif %}
 			<label for="amount">Amount</label>
 		</div>
 		<div class="input-field col s6">
 			<i class="material-icons prefix">exposure</i>
 			<select name="entry_type">
-				<option value="expense">Expense</option>
-				<option value="income">Income</option>
+				{% if entry.amount >= 0 %}
+					<option value="expense">Expense</option>
+					<option value="income" selected>Income</option>
+				{% else %}
+					<option value="expense" selected>Expense</option>
+					<option value="income">Income</option>
+				{% endif %}
 			</select>
 		</div>
 		<button class="btn waves-effect waves-light" type="submit">Edit
