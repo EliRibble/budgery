@@ -90,6 +90,9 @@ def budget_entry_create(
 	db.add(entry)
 	db.commit()
 
+def budget_entry_get_by_id(db: Session, entry_id: int) -> models.BudgetEntry:
+	return db.query(models.BudgetEntry).filter_by(id=entry_id).first()
+
 def budget_entry_list_by_budget(db: Session, budget: models.Budget) -> Iterable[models.BudgetEntry]:
 	return db.query(models.BudgetEntry).filter_by(budget_id=budget.id)
 

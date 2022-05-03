@@ -266,6 +266,23 @@ async def budget_get(
 		"request": request,
 		"user": user})
 
+@app.get("/budget/{budget_id}/entry/{entry_id}")
+async def budget_entry_get(
+		request: Request,
+		budget_id: int,
+		entry_id: int,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
+	db_user = crud.user_get_by_username(db, user.username)
+	budget = crud.budget_get_by_id(db, budget_id)
+	entry = crud.budget_entry_get_by_id(db, entry_id)
+	return templates.TemplateResponse("budget-entry.html.jinja", {
+		"budget": budget,
+		"current_page": "budget",
+		"entry": entry,
+		"request": request,
+		"user": user})
+
 @app.get("/category")
 async def category_list_get(
 		request: Request,
