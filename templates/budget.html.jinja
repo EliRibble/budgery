@@ -24,40 +24,22 @@ var instances = M.FloatingActionButton.init(elems, {});
 </div>
 
 <table>
-	<thead>
-		<tr>
-			<th>Property</th>
-			<th>Value</th>
-		</tr>
-	</thead>
 	<tbody>
-		<tr><td>ID</td><td>{{ budget.id }}</td></tr>
-		<tr><td>Start</td><td>{{ budget.start_date.isoformat() }}</td></tr>
-		<tr><td>End</td><td>{{ budget.end_date.isoformat() }}</td></tr>
 		<tr><td>Net</td><td>{{ color_net_amount(net) }}</td></tr>
 	</tbody>
 </table>
-<table>
-	<thead>
-		<tr>
-			<th>Name</th>
-			<th>Amount</th>
-			<th>Category</th>
-			<th>Actions</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for entry in entries %}
-			<tr>
-				<td>{{ entry.name }}</td>
-				<td>{{ entry.amount }}</td>
-				<td>{{ entry.category }}</td>
-				<td>
-					<a href="/budget/{{ budget.id }}/entry/{{ entry.id }}">
-						<i class="material-icons">edit</i>
-					</a>
-				</td>
-			</tr>
-		{% endfor %}
+{% for category in categories %}
+<ul class="collection with-header">
+	<li class="collection-header">
+		<h4>{{ category }} {{ amount_by_category[category]|currency }}</h4>
+	</li>
+	{% for entry in entries_by_category[category] %}
+		<a href="/budget/{{ budget.id }}/entry/{{ entry.id }}">
+			<li class="collection-item">{{ entry.name }}
+				<span class="secondary-content">{{ entry.amount|currency }}</span>
+			</li>
+		</a>
+	{% endfor %}
+{% endfor %}
 {% endif %}
 {% endblock %}

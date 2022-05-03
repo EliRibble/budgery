@@ -283,12 +283,22 @@ async def budget_get(
 	db_user = crud.user_get_by_username(db, user.username)
 	budget = crud.budget_get_by_id(db, budget_id)
 	entries = crud.budget_entry_list_by_budget(db, budget)
+	categories = set(entry.category for entry in entries)
+	entries_by_category = {category:[] for category in categories}
+	for entry in entries:
+		entries_by_category[entry.category].append(entry)
+	amount_by_category = {
+		category: sum(entry.amount for entry in entries_by_category[category])
+		for category in categories}
+		
 	history = crud.budget_history_list_by_budget_id(db, budget_id)
 	net = sum(entry.amount for entry in entries)
 	return templates.TemplateResponse("budget.html.jinja", {
+		"amount_by_category": amount_by_category,
 		"budget": budget,
+		"categories": sorted(categories),
 		"current_page": "budget",
-		"entries": entries,
+		"entries_by_category": entries_by_category,
 		"history": history,
 		"net": net,
 		"request": request,
