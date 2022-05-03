@@ -73,6 +73,7 @@ def budget_create(
 	db.add(budget)
 	user.user_budget_permissions.append(permission)
 	db.commit()
+	return budget
 
 def budget_entry_create(
 		db: Session,

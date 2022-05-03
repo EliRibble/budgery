@@ -202,7 +202,7 @@ async def budget_create_post(
 		end_date = end_date,
 		start_date = start_date,
 		user = db_user)
-	return RedirectResponse(status_code=303, url="/budget")
+	return RedirectResponse(status_code=303, url=f"/budget/{budget.id}")
 	
 @app.get("/budget/{budget_id}/entry/create", response_class=HTMLResponse)
 async def budget_entry_create_get(
