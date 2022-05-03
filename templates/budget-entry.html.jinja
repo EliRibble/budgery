@@ -9,10 +9,51 @@
 {% include "fragments/breadcrumb.html.jinja" %}
 {% endblock %}
 
+{% block onready %}
+var elems = document.querySelectorAll("select");
+var instances = M.FormSelect.init(elems, {});
+{% endblock %}
+
 {% block content %}
 {% if not entry %}
 	<p>Sorry, a budget entry with that ID does not exist or you don't have access to it.</p>
 {% else %}
+
+<div class="row">
+<form class="col s12" action="/budget/{{budget.id}}/entry/{{entry.id}}" method="POST"/>
+	<input type="hidden" name="budget" value="{{budget.id}}"/>
+	<input type="hidden" name="id" value="{{entry.id}}"/>
+	<div class="row">
+		<div class="row">
+			<div class="input-field col s12">
+				<i class="material-icons prefix">call_made</i>
+				<input name="name" type="text" value="{{entry.name}}">
+				<label for="name">Name</label>
+			</div>
+		</div>
+		<div class="input-field col s12">
+			<i class="material-icons prefix">tag</i>
+			<input id="category" name="category" type="text" value="{{entry.category}}">
+			<label for="category">Category</label>
+		</div>
+		<div class="input-field col s6">
+			<i class="material-icons prefix">attach_money</i>
+			<input id="amount" name="amount" type="text" value="{{entry.amount}}"/>
+			<label for="amount">Amount</label>
+		</div>
+		<div class="input-field col s6">
+			<i class="material-icons prefix">exposure</i>
+			<select name="entry_type">
+				<option value="expense">Expense</option>
+				<option value="income">Income</option>
+			</select>
+		</div>
+		<button class="btn waves-effect waves-light" type="submit">Edit
+			<i class="material-icons right">send</i>
+		</button>
+	</div>
+</form>
+{% endif %}
 <table>
 	<thead>
 		<tr>

@@ -246,6 +246,34 @@ async def budget_entry_create_post(
 		user = db_user)
 	return RedirectResponse(status_code=303, url=f"/budget/{budget_id}")
 	
+@app.post("/budget/{budget_id}/entry/{entry_id}")
+async def budget_entry_update_post(
+		request: Request,
+		budget_id: int,
+		entry_id: int,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user),
+		amount: float = Form(...),
+		category: str = Form(...),
+		entry_type: str = Form(...),
+		name: str = Form(...),
+	):
+	db_user = crud.user_get_by_username(db, user.username)
+	if amount < 0:
+		raise ValueError(f"Don't supply negative values like '{amount}', use 'entry_type' instead.")
+	if entry_type == "expense":
+		amount = amount * -1
+	elif entry_type != "income":
+		raise ValueError(f"entry_type must be either 'expense' or 'income'. You gave '{entry_type}'")
+	crud.budget_entry_update(
+		db = db,
+		amount = amount,
+		category = category,
+		entry_id = entry_id,
+		name = name,
+		user = db_user)
+	return RedirectResponse(status_code=303, url=f"/budget/{budget_id}")
+
 @app.get("/budget/{budget_id}")
 async def budget_get(
 		request: Request,
