@@ -79,6 +79,7 @@ class BudgetEntry(Versioned, Base):
 	budget_id = Column(Integer, ForeignKey("budget.id"))
 	amount = Column(Float)
 	category = Column(String, nullable=True)
+	created = Column(DateTime, default=datetime.datetime.now)
 	name = Column(String)
 
 	def __init__(self, amount: int, budget: "Budget", category: Optional[str], name: str) -> None:
@@ -197,6 +198,7 @@ AccountHistory = Account.__history_mapper__.class_
 AccountPermission.account = relationship(Account)
 AccountPermission.user = relationship(User,
 	backref=backref("user_account_permissions", cascade="all, delete-orphan"))
+BudgetEntryHistory = BudgetEntry.__history_mapper__.class_
 BudgetHistory = Budget.__history_mapper__.class_
 BudgetPermission.budget = relationship(Budget)
 BudgetPermission.user = relationship(User,
