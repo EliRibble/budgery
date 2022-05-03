@@ -51,7 +51,7 @@ def account_history_list_by_account_id(db: Session, account_id: int) -> Iterable
 def account_list(db: Session, user: models.User):
 	return db.query(models.Account).all()
 
-def account_update(db: Session, account: int, institution: int, name: str) -> None:
+def account_update(db: Session, account: models.Account, institution: int, name: str) -> None:
 	account.name = name
 	account.institution = institution
 	db.commit()
