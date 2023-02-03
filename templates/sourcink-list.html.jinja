@@ -8,6 +8,14 @@
 {% block content %}
 {% if sourcinks %}
 <div class="row">
+	<form class="col s12" action="/sourcinks" method="GET">
+		<div class="input-field col s6">
+			<i class="material-icons prefix">search</i>
+			<input name="name" type="text"/>
+		</div>
+	</form>
+</div>
+<div class="row">
 	<table>
 		<thead>
 			<tr>
