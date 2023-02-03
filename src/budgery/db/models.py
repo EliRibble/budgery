@@ -126,6 +126,19 @@ class LogEntry(Base):
 	content = Column(String)
 	user_id = Column(Integer, ForeignKey("user.id"))
 
+class ReconciliationStatus(enum.Enum):
+	started = 1
+	finished = 2
+	
+class Reconciliation(Base):
+	"A snapshot in time of an account when we ensured that we have correct data."
+	__tablename__ = "reconciliation"
+	id = Column(Integer, primary_key=True, index=True)
+	account_id = Column(Integer, ForeignKey("account.id", name="fk_account_id"))
+	created = Column(DateTime())
+	status = Column(Enum(ReconciliationStatus))
+	user_id = Column(Integer, ForeignKey("user.id"))
+	
 class Sourcink(Base):
 	"""A source or sink for transactions.
 
@@ -183,6 +196,13 @@ class Transaction(Base):
 		self.sourcink_from = sourcink_from
 		self.sourcink_to = sourcink_to
 		
+class TransactionRule(Base):
+	"Rules for how to manipulate transactions when created or imported."
+	__tablename__ = "transaction_rule"
+
+	id = Column(Integer, primary_key=True, index=True)
+	description_pattern = Column(String(), nullable=True)
+	
 
 class User(Base):
 	__tablename__ = "user"

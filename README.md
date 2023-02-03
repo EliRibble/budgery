@@ -11,6 +11,16 @@ Budgery is a self-hosted financial application for setting budgets, tracking exp
  * Zero-based budgeting - every dollar has a job and a label.
  * Imports from various systems (Bank CSV, OFX).
 
+## Installation
+
+Set up a Python virtual environment with the necessary dependencies
+
+```
+python3 -m venv ve
+source ve/bin/activate[.fish]
+python3 -m pip install -e .
+```
+
 ## Running
 
 Budgery uses uvicorn. You can run a server with:

@@ -3,7 +3,7 @@ import datetime
 import logging
 from typing import Iterable, Optional
 
-from sqlalchemy import func
+from sqlalchemy import func, update
 from sqlalchemy.orm import Session
 
 from budgery.db import models

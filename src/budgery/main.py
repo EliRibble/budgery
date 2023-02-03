@@ -553,6 +553,20 @@ async def transaction_create_post(
 	)
 	return RedirectResponse(status_code=303, url="/transaction")
 
+@app.get("/transaction/rule")
+async def transaction_rule_list_get(
+		request: Request,
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user)):
+	db_user = crud.user_get_by_username(db, user.username)
+	sourcinks = crud.sourcink_list(db, db_user)
+	return templates.TemplateResponse("transaction-create.html.jinja", {
+		"categories": categories,
+		"request": request,
+		"sourcinks": sourcinks,
+		"user": user,
+	})
+
 @app.get("/transaction/{transaction_id}")
 async def transaction_get(
 		request: Request,
