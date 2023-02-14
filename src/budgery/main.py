@@ -28,8 +28,8 @@ templates = Jinja2Templates(directory="templates")
 templates.env.filters["currency"] = custom_filters.currency
 
 oauth.register(
-	name="keycloak",
-	server_metadata_url=config("KEYCLOAK_METADATA_URL"),
+	name="oidc",
+	server_metadata_url=config("OIDC_METADATA_URL"),
 	client_kwargs={
 		"scope": "openid email profile"
 	}
@@ -152,10 +152,10 @@ async def allocation(request: Request, user: User = Depends(get_user)):
 @app.get("/auth", response_class=HTMLResponse)
 async def auth(request: Request, db: Session = Depends(get_db)):
 	try:
-		token = await oauth.keycloak.authorize_access_token(request)
+		token = await oauth.oidc.authorize_access_token(request)
 	except OAuthError as error:
 		return HTMLResponse(f"<h1>{error.error}</h1>")
-	user = await oauth.keycloak.parse_id_token(request, token)
+	user = await oauth.oidc.parse_id_token(request, token)
 	user_model = _parse_user(user)
 	crud.user_ensure_exists(db, user_model)
 	request.session["user"] = dict(user)
@@ -339,7 +339,7 @@ async def category_list_get(
 @app.route("/login")
 async def login(request: Request):
 	redirect_uri = request.url_for("auth")
-	return await oauth.keycloak.authorize_redirect(request, redirect_uri)
+	return await oauth.oidc.authorize_redirect(request, redirect_uri)
 
 @app.route("/logout")
 async def logout(request: Request):
