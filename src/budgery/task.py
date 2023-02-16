@@ -10,25 +10,43 @@ from budgery.db import crud
 
 LOGGER = logging.getLogger(__name__)
 
-def _import_everydollar_transaction(account_id: int, data, db, import_job, user) -> None:
-	"Process a single line of an Every Dollar CSV."
-	at = datetime.datetime.fromisoformat(data["date"])
-	amount = float(data["amount"])
-	category = data["description"]
-	sourcink_name_from = data["source_name"]
-	sourcink_name_to = data["destination_name"]
-	sourcink_from = crud.sourcink_get_or_create(db, sourcink_name_from)
-	sourcink_to = crud.sourcink_get_or_create(db, sourcink_name_to)
+def _import_afcu_transaction(
+	account_id: int,
+	data,
+	db,
+	import_job,
+	user) -> None:
+	"Process a single line of an America First Credit Union CSV."
+	date = datetime.date.fromisoformat(data["Date"])
+	time = datetime.time(0, 1, 2, 3)
+	at = datetime.datetime.combine(date, time)
+	description = data["Description"]
+	if "Pending -" in description:
+		return
+	sourcink_unknown = crud.sourcink_get_or_create(db, "Unknown")
+	if data["Debit"]:
+		amount = float(data["Debit"])
+		account_id_from = account_id
+		account_id_to = sourcink_unknown
+	elif data["Credit"]:
+		amount = float(data["Credit"])
+		account_id_to = account_id
+		account_id_from = sourcink_unknown
+	else:
+		raise Exception("No value for debit or credit.")
 	crud.transaction_create(
 		db=db,
+		description=description,
+		account_id_from=account_id_from,
+		account_id_to=account_id_to,
 		amount=amount,
 		at=at,
-		category=category,
+		category=None,
 		import_job=import_job,
-		sourcink_from=sourcink_from,
-		sourcink_to=sourcink_to,
+		sourcink_from=sourcink_unknown,
+		sourcink_to=sourcink_unknown,
 	)
-
+	
 def _import_ally_transaction(
 	account_id: int,
 	data,
@@ -64,6 +82,26 @@ def _import_ally_transaction(
 		sourcink_from=sourcink_unknown,
 		sourcink_to=sourcink_unknown,
 	)
+
+def _import_everydollar_transaction(account_id: int, data, db, import_job, user) -> None:
+	"Process a single line of an Every Dollar CSV."
+	at = datetime.datetime.fromisoformat(data["date"])
+	amount = float(data["amount"])
+	category = data["description"]
+	sourcink_name_from = data["source_name"]
+	sourcink_name_to = data["destination_name"]
+	sourcink_from = crud.sourcink_get_or_create(db, sourcink_name_from)
+	sourcink_to = crud.sourcink_get_or_create(db, sourcink_name_to)
+	crud.transaction_create(
+		db=db,
+		amount=amount,
+		at=at,
+		category=category,
+		import_job=import_job,
+		sourcink_from=sourcink_from,
+		sourcink_to=sourcink_to,
+	)
+
 
 HEADER_TO_PROCESSOR = {(
 	"user_id",
@@ -121,7 +159,14 @@ HEADER_TO_PROCESSOR = {(
 	" Amount",
 	" Type",
 	" Description",
-): _import_ally_transaction}
+): _import_ally_transaction, (
+	"Date",
+	"No.",
+	"Description",
+	"Debit",
+	"Credit",
+): _import_afcu_transaction,
+}
 
 def _csv_iterator(f: tempfile.TemporaryFile):
 	reader = csv.reader(codecs.iterdecode(f, "UTF-8"), delimiter=",", quotechar="\"")

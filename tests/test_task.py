@@ -34,3 +34,10 @@ class TestParsers(unittest.TestCase):
 		self.assertEqual(len(content), 5)
 		self.assertEqual(content[0]["Description"], "SMASHBURGER  1477 CHANDLER, AZ, USA")
 		self.assertEqual(content[3]["Amount"], "-61.40")
+
+	def test_america_first_credit_union(self):
+		content = self._get_import_data("afcu.csv")
+		self.assertEqual(len(content), 35)
+		self.assertEqual(content[0]["Description"], "Pending - 01/13 - AMZN Mktp US")
+		self.assertEqual(content[10]["Debit"], "-95.11")
+		self.assertEqual(content[20]["Date"], "1/5/2023")
