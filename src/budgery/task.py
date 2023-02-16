@@ -3,6 +3,8 @@ import codecs
 import csv
 import datetime
 import logging
+from pathlib import Path
+import tempfile
 
 from budgery.db import crud
 
@@ -121,24 +123,33 @@ HEADER_TO_PROCESSOR = {(
 	" Description",
 ): _import_ally_transaction}
 
+def _csv_iterator(f: tempfile.TemporaryFile):
+	reader = csv.reader(codecs.iterdecode(f, "UTF-8"), delimiter=",", quotechar="\"")
+	header = tuple(next(reader))
+	return header, reader
+
+def _processor_from_header(header):
+	"Get the processor based on the header"
+	for header_pattern, p in HEADER_TO_PROCESSOR.items():
+		if header == header_pattern:
+			return p
+	if not processor:
+		raise Exception(f"No header pattern found that matches {header}")
+
+def _clean_data_iterator(header, reader):
+	for row in reader:
+		yield {header[i].strip(): row[i] for i in range(len(header))}
+
 async def process_transaction_upload(
-		csv_file,
+		csv_file: tempfile.TemporaryFile,
 		db,
 		import_job,
 		user,
 	) -> None:
 	await asyncio.sleep(0)
-	reader = csv.reader(codecs.iterdecode(csv_file.file, "UTF-8"), delimiter=",", quotechar="\"")
-	header = tuple(next(reader))
-	processor = None
-	for header_pattern, p in HEADER_TO_PROCESSOR.items():
-		if header == header_pattern:
-			processor = p
-	if not processor:
-		raise Exception(f"No header pattern found that matches {header}")
-
-	for n, row in enumerate(reader):
-		data = {header[i].strip(): row[i] for i in range(len(header))}
+	header, reader = _csv_iterator(csv)
+	processor = _processor_from_header(header)
+	for data in _clean_data_iterator(header, reader):
 		processor(
 			account_id=import_job.account_id,
 			data=data,
@@ -146,5 +157,4 @@ async def process_transaction_upload(
 			import_job=import_job,
 			user=user,
 		)
-		LOGGER.info("Handled row %d", n)
 	crud.import_job_finish(db, import_job)

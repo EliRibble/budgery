@@ -392,7 +392,7 @@ async def import_create_post(
 	)
 	background_tasks.add_task(
 		task.process_transaction_upload,
-		csv_file=csv_file,
+		csv_file=csv_file.file,
 		db=db,
 		import_job=import_job,
 		user=db_user,

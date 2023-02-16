@@ -29,3 +29,8 @@ Budgery uses uvicorn. You can run a server with:
 uvicorn budgery.main:app --reload --port 10100
 
 ```
+
+## Testing
+
+Tests require `nose2` and `tox`. `tox` will install `nose2` directly into its environment if you run it.
+Otherwise you can run all the tests with just `nose2`.
