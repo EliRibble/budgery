@@ -265,3 +265,6 @@ def user_ensure_exists(db: Session, user: User) -> None:
 
 def user_get_by_username(db: Session, username: str):
 	return db.query(models.User).filter(models.User.username == username).first()
+
+def user_list(db: Session):
+	return db.query(models.User).all()
