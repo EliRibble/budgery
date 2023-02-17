@@ -381,18 +381,19 @@ async def import_create_post(
 		account_id: int = Form(...),
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user),
-		csv_file: UploadFile = File(...),
+		import_file: UploadFile = File(...),
 	):
 	db_user = crud.user_get_by_username(db, user.username)
 	import_job = crud.import_job_create(
 		account_id = account_id,
 		db = db,
-		filename = csv_file.filename,
+		filename = import_file.filename,
 		user = db_user,
 	)
 	background_tasks.add_task(
 		task.process_transaction_upload,
-		csv_file=csv_file.file,
+		import_file=import_file.file,
+		filename=import_file.filename,
 		db=db,
 		import_job=import_job,
 		user=db_user,
