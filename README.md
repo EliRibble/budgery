@@ -32,5 +32,5 @@ uvicorn budgery.app:app --reload --port 10100
 
 ## Testing
 
-Tests require `nose2` and `tox`. `tox` will install `nose2` directly into its environment if you run it.
-Otherwise you can run all the tests with just `nose2`.
+Tests require `pytest` and `tox`. `tox` will install `pytest` directly into its environment if you run it.
+Otherwise you can run all the tests with just `py.test`.
