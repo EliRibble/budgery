@@ -24,18 +24,19 @@ from budgery.dataclasses import ImportRow
 
 def _process_amex(data: Mapping[str, str]) -> Optional[ImportRow]:
 	"Process a single row of Amex data."
-	account_id_is_from = True
-	amount = data["Amount"]
 	at = datetime.datetime.strptime(data["Date"], "%m/%d/%Y")
-	description = data["Description"]
 	return ImportRow(
-		account_id_is_from=account_id_is_from,
-		amount=amount,
+		account_id_is_from=True,
+		address=data["Address"],
+		amount=data["Amount"],
 		at=at,
-		category=None,
-		description=description,
+		category=data["Category"],
+		city=data["City/State"],
+		description=data["Description"],
+		extended_details=data["Extended Details"],
 		sourcink_from=None,
 		sourcink_to=None,
+		zipcode=data["Zip Code"],
 	)
 
 def _xlsx_row_dict_iterator(headers, sheet_iterator):

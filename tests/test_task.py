@@ -47,3 +47,5 @@ class TestParsers(unittest.TestCase):
 		content = self._get_import_data("amex.xlsx")
 		self.assertEqual(len(content), 14)
 		self.assertEqual(content[0].at, datetime.datetime(2023, 1, 12))
+		self.assertEqual(content[2].extended_details, "NT_N9T78DMS +17198664578\nUSA SWIMMING, INC.\nCOLORADO SPRINGS\nCO\n+17198664578")
+		self.assertEqual(content[3].category, "Business Services-Other Services")
