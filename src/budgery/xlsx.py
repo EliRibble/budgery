@@ -1,6 +1,7 @@
 import datetime
 import io
 from typing import Iterable, List, Mapping, Optional, Tuple
+import warnings
 
 import openpyxl
 
@@ -46,11 +47,16 @@ def _xlsx_row_dict_iterator(headers, sheet_iterator):
 
 def extract_rows(content: bytes) -> List[ImportRow]:
 	"Get all the content from the xlsx file"
-	workbook = openpyxl.load_workbook(io.BytesIO(content))
-	sheet_names = workbook.get_sheet_names()
-	# For now, assume AMEX
-	# Amex spreadsheet has headers starting at row 7
-	sheet = workbook.get_sheet_by_name("Transaction Details")
+	# There's no way to keep openpyxl from emitting warnings about the internal
+	# mechanics of the file we are importing. This looks like
+	# "Workbook contains no default style, apply openpyxl's default"
+	with warnings.catch_warnings(record=True):
+		warnings.simplefilter("always")
+		workbook = openpyxl.load_workbook(io.BytesIO(content))
+		sheet_names = workbook.get_sheet_names()
+		# For now, assume AMEX
+		# Amex spreadsheet has headers starting at row 7
+		sheet = workbook.get_sheet_by_name("Transaction Details")
 	itr = sheet.iter_rows()
 	for i in range(6):
 		next(itr)
