@@ -26,7 +26,7 @@ python3 -m pip install -e .
 Budgery uses uvicorn. You can run a server with:
 
 ```
-uvicorn budgery.main:app --reload --port 10100
+uvicorn budgery.app:app --reload --port 10100
 
 ```
 

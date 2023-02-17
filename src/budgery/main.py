@@ -1,5 +1,7 @@
 import calendar
 import datetime
+from functools import lru_cache
+import logging
 from typing import Mapping, Optional, Union
 
 from authlib.integrations.starlette_client import OAuth, OAuthError
@@ -17,30 +19,44 @@ from budgery.db import connection as db_connection
 from budgery.db import crud
 from budgery.user import User
 
-app = FastAPI()
-config = Config("env")
-db_engine = db_connection.connect(config)
+LOGGER = logging.getLogger(__name__)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
-oauth = OAuth(config)
+app = FastAPI()
 templates = Jinja2Templates(directory="templates") 
 templates.env.filters["currency"] = custom_filters.currency
 
-oauth.register(
-	name="oidc",
-	server_metadata_url=config("OIDC_METADATA_URL"),
-	client_kwargs={
-		"scope": "openid email profile"
-	}
-)
+@lru_cache()
+def get_config():
+	return Config("env")
 
-def get_db():
+@lru_cache()
+def get_db_engine(config: Config = Depends(get_config)):
+	return db_connection.connect(config)
+
+def get_db(
+		config: Config = Depends(get_config),
+		db_engine = Depends(get_db_engine),
+	):
 	db = db_connection.session(db_engine)
 	try:
 		yield db
 	finally:
 		db.close()
+
+@app.on_event("startup")
+def startup() -> None:
+	LOGGER.info("Adding base config")
+	config = get_config()
+	app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
+	oauth = OAuth(config)
+	oauth.register(
+		name="oidc",
+		server_metadata_url=config("OIDC_METADATA_URL"),
+		client_kwargs={
+			"scope": "openid email profile"
+		}
+	)
+	app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def get_user(request: Request) -> Optional[User]:
 	user_data = request.session.get("user")
