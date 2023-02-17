@@ -1,21 +1,22 @@
 import csv
 import datetime
+import logging
 from pathlib import Path
 import pprint
 from typing import Dict, List
 import unittest
 
+from fastapi.testclient import TestClient
+from starlette.config import Config
+
 from budgery import task
+from budgery.main import app, get_config
 from budgery.db import connection as db_connection
 from budgery.db import crud
-from starlette.config import Config, environ
+
+LOGGER = logging.getLogger(__name__)
 
 class TestParsers(unittest.TestCase):
-	def setUp(self):
-		config = Config("test.env")
-		db_engine = db_connection.connect(config)
-		self.db = db_connection.session(db_engine)
-
 	def _get_import_data(self, filename: str) -> List[Dict[str, str]]:
 		"Get the content of a test import file."
 		with open(Path("tests") / "import_data" / filename, "rb") as f:
@@ -49,3 +50,19 @@ class TestParsers(unittest.TestCase):
 		self.assertEqual(content[0].at, datetime.datetime(2023, 1, 12))
 		self.assertEqual(content[2].extended_details, "NT_N9T78DMS +17198664578\nUSA SWIMMING, INC.\nCOLORADO SPRINGS\nCO\n+17198664578")
 		self.assertEqual(content[3].category, "Business Services-Other Services")
+
+class TestImport(unittest.IsolatedAsyncioTestCase):
+	def setUp(self):
+		logging.basicConfig(level=logging.INFO)
+		LOGGER.info("Doing setUp")
+		def get_config_override() -> Config:
+			return Config("test.env")
+		app.dependency_overrides[get_config] = get_config_override
+		@app.on_event("startup")
+		def setup_for_tests() -> None:
+			LOGGER.info("Setup for tests")
+
+	def test_root(self):
+		with TestClient(app) as client:
+			response = client.get("/")
+		self.assertEqual(response.status_code, 200)
