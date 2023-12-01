@@ -43,12 +43,17 @@ def get_db(
 	finally:
 		db.close()
 
+@lru_cache()
+def get_oauth():
+	config = get_config()
+	return OAuth(config)
+
 @app.on_event("startup")
 def startup() -> None:
 	LOGGER.info("Adding base config")
 	config = get_config()
 	app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
-	oauth = OAuth(config)
+	oauth = get_oauth()
 	oauth.register(
 		name="oidc",
 		server_metadata_url=config("OIDC_METADATA_URL"),
@@ -166,7 +171,9 @@ async def allocation(request: Request, user: User = Depends(get_user)):
 		"user": user})
 
 @app.get("/auth", response_class=HTMLResponse)
-async def auth(request: Request, db: Session = Depends(get_db)):
+async def auth(request: Request,
+		db: Session = Depends(get_db),
+		oauth: OAuth = Depends(get_oauth)):
 	try:
 		token = await oauth.oidc.authorize_access_token(request)
 	except OAuthError as error:
@@ -354,6 +361,7 @@ async def category_list_get(
 
 @app.route("/login")
 async def login(request: Request):
+	oauth = get_oauth()
 	redirect_uri = request.url_for("auth")
 	return await oauth.oidc.authorize_redirect(request, redirect_uri)
 
