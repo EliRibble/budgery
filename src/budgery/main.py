@@ -1,4 +1,5 @@
 import calendar
+from contextlib import asynccontextmanager
 import datetime
 from functools import lru_cache
 import logging
@@ -21,9 +22,24 @@ from budgery.user import User
 
 LOGGER = logging.getLogger(__name__)
 
-app = FastAPI()
 templates = Jinja2Templates(directory="templates") 
 templates.env.filters["currency"] = custom_filters.currency
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+	LOGGER.info("Adding base config")
+	config = get_config()
+	oauth = get_oauth()
+	oauth.register(
+		name="oidc",
+		server_metadata_url=config("OIDC_METADATA_URL"),
+		client_kwargs={
+			"scope": "openid email profile"
+		}
+	)
+	app.mount("/static", StaticFiles(directory="static"), name="static")
+	yield
+app = FastAPI(lifespan=lifespan)
 
 @lru_cache()
 def get_config():
@@ -50,20 +66,6 @@ def get_db(
 def get_oauth():
 	config = get_config()
 	return OAuth(config)
-
-@app.on_event("startup")
-def startup() -> None:
-	LOGGER.info("Adding base config")
-	config = get_config()
-	oauth = get_oauth()
-	oauth.register(
-		name="oidc",
-		server_metadata_url=config("OIDC_METADATA_URL"),
-		client_kwargs={
-			"scope": "openid email profile"
-		}
-	)
-	app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def get_user(request: Request) -> Optional[User]:
 	user_data = request.session.get("user")
