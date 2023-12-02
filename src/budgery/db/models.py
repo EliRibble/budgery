@@ -165,7 +165,7 @@ class Transaction(Base):
 	account_id_to = Column(Integer, ForeignKey("account.id", name="fk_account_id_to"), nullable=True)
 	amount = Column(Float)
 	at = Column(DateTime())
-	budget_entry = Column(Integer, ForeignKey("budget_entry.id", name="fk_budget_entry_id"), nullable=True)
+	budget_entry_id = Column(Integer, ForeignKey("budget_entry.id", name="fk_budget_entry_id"), nullable=True)
 	description = Column(String(), nullable=True)
 	category = Column(String(), nullable=True)
 	import_job_id = Column(Integer, ForeignKey("import_job.id", name="fk_import_job_id"), nullable=True)
