@@ -182,7 +182,7 @@ async def auth(request: Request,
 		token = await oauth.oidc.authorize_access_token(request)
 	except OAuthError as error:
 		return HTMLResponse(f"<h1>{error.error}</h1>")
-	user = await oauth.oidc.parse_id_token(request, token)
+	user = await oauth.oidc.parse_id_token(token, token["userinfo"]["nonce"])
 	user_model = _parse_user(user)
 	crud.user_ensure_exists(db, user_model)
 	request.session["user"] = dict(user)
