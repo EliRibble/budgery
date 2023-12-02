@@ -4,8 +4,7 @@ from typing import Optional
 
 from sqlalchemy import Boolean, Column, Date, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import backref, declarative_base, relationship
 
 from budgery.db.history_meta import Versioned
 
