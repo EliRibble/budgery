@@ -41,41 +41,27 @@ async def process_transaction_upload(
 		import_job,
 		user,
 	) -> None:
+	# Immediately push this coroutine to the bottom of the stack.
 	await asyncio.sleep(0)
+	rows = _extract_rows(import_file)
 	sourcink_unknown = crud.sourcink_get_or_create(db, "Unknown")
-	type_ = data["Type"]
-	if type_ == "Withdrawal":
-		account_id_from = account_id
-		account_id_to = None
-	elif type_ == "Deposit":
-		account_id_from = None
-		account_id_to = account_id
-	else:
-		raise Exception(f"Unknown type {type_}")
-
-	crud.transaction_create(
-		db=db,
-		description=description,
-		account_id_from=account_id_from,
-		account_id_to=account_id_to,
-		amount=amount,
-		at=at,
-		category=None,
-		import_job=import_job,
-		sourcink_from=sourcink_unknown,
-		sourcink_to=sourcink_unknown,
-	)
-	if filename.endswith(".csv"):
-		header, reader = _csv_iterator(import_file)
-	elif filename.endswith(".xlxs"):
-		header, reader = _xlxs_iterator(import_file)
-	processor = _processor_from_header(header)
-	for data in _clean_data_iterator(header, reader):
-		processor(
-			account_id=import_job.account_id,
-			data=data,
+	for row in rows:
+		if row.account_id_is_from:
+			account_id_from = account_id
+			account_id_to = None
+		else:
+			account_id_from = None
+			account_id_to = account_id
+		crud.transaction_create(
 			db=db,
+			description=description,
+			account_id_from=account_id_from,
+			account_id_to=account_id_to,
+			amount=amount,
+			at=at,
+			category=None,
 			import_job=import_job,
-			user=user,
+			sourcink_from=sourcink_unknown,
+			sourcink_to=sourcink_unknown,
 		)
-	crud.import_job_finish(db, import_job)
+	import_job_finish(db, import_job)
