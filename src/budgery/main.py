@@ -89,12 +89,14 @@ async def root(request: Request, db: Session = Depends(get_db), user: User = Dep
 @app.get("/account")
 async def account_list_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
 	institutions = crud.institution_list(db)
+	institutions_by_id = {i.id: i for i in institutions}
 	db_user = crud.user_get_by_username(db, user.username)
 	accounts = db_user.accounts
 	return templates.TemplateResponse("account-list.html.jinja", {
 		"accounts": accounts,
 		"current_page": "account",
 		"institutions": institutions,
+		"institutions_by_id": institutions_by_id,
 		"request": request,
 		"user": user})
 
