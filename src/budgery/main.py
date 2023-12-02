@@ -2,7 +2,7 @@ import calendar
 import datetime
 from functools import lru_cache
 import logging
-from typing import Mapping, Optional, Union
+from typing import Annotated, Mapping, Optional, Union
 
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, Request, UploadFile
@@ -29,6 +29,9 @@ templates.env.filters["currency"] = custom_filters.currency
 def get_config():
 	return Config("env")
 
+config = get_config()
+app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
+
 @lru_cache()
 def get_db_engine(config: Config = Depends(get_config)):
 	return db_connection.connect(config)
@@ -52,7 +55,6 @@ def get_oauth():
 def startup() -> None:
 	LOGGER.info("Adding base config")
 	config = get_config()
-	app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
 	oauth = get_oauth()
 	oauth.register(
 		name="oidc",
@@ -112,10 +114,10 @@ async def accounts_create_get(request: Request, db: Session = Depends(get_db), u
 @app.post("/account/create")
 async def accounts_create_post(
 		request: Request,
+		name: Annotated[str, Form],
+		institution_name: Annotated[str, Form],
 		db: Session = Depends(get_db),
-		user: User = Depends(get_user),
-		name: str = Form(...),
-		institution_name: str = Form(...)):
+		user: User = Depends(get_user)):
 	db_user = crud.user_get_by_username(db, user.username)
 	institution = crud.institution_get_by_name(db, institution_name)
 	crud.account_create(
@@ -153,8 +155,8 @@ async def account_edit_get(request: Request, account_id: int, db: Session = Depe
 async def account_edit_post(
 		request: Request,
 		account_id: int,
-		name: str = Form(...),
-		institution_name: str = Form(...),
+		name: Annotated[str, Form()],
+		institution_name: Annotated[str, Form()],
 		db: Session = Depends(get_db)):
 	account = crud.account_get_by_id(db, account_id)
 	institution = crud.institution_get_by_name(db, institution_name)
@@ -215,10 +217,10 @@ async def budget_create_get(
 @app.post("/budget/create")
 async def budget_create_post(
 		request: Request,
+		end_date_str: Annotated[str, Form()],
+		start_date_str: Annotated[str, Form()],
 		db: Session = Depends(get_db),
-		user: User = Depends(get_user),
-		end_date_str: str = Form(...),
-		start_date_str: str = Form(...)):
+		user: User = Depends(get_user)):
 	db_user = crud.user_get_by_username(db, user.username)
 	end_date = datetime.date.fromisoformat(end_date_str)
 	start_date = datetime.date.fromisoformat(start_date_str)
@@ -245,12 +247,12 @@ async def budget_entry_create_get(
 async def budget_entry_create_post(
 		request: Request,
 		budget_id: int,
+		amount: Annotated[float, Form()],
+		category: Annotated[str, Form()],
+		entry_type: Annotated[str, Form()],
+		name: Annotated[str, Form()],
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user),
-		amount: float = Form(...),
-		category: str = Form(...),
-		entry_type: str = Form(...),
-		name: str = Form(...),
 	):
 	db_user = crud.user_get_by_username(db, user.username)
 	budget = crud.budget_get_by_id(db, budget_id)
@@ -276,12 +278,12 @@ async def budget_entry_update_post(
 		request: Request,
 		budget_id: int,
 		entry_id: int,
+		amount: Annotated[float, Form()],
+		category: Annotated[str, Form()],
+		entry_type: Annotated[str, Form()],
+		name: Annotated[str, Form()],
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user),
-		amount: float = Form(...),
-		category: str = Form(...),
-		entry_type: str = Form(...),
-		name: str = Form(...),
 	):
 	db_user = crud.user_get_by_username(db, user.username)
 	if amount < 0:
@@ -404,7 +406,7 @@ async def import_create_get(request: Request,
 async def import_create_post(
 		request: Request,
 		background_tasks: BackgroundTasks,
-		account_id: int = Form(...),
+		account_id: Annotated[int, Form()],
 		db: Session = Depends(get_db),
 		user: User = Depends(get_user),
 		import_file: UploadFile = File(...),
@@ -451,10 +453,11 @@ async def institution_create_get(request: Request, user: User = Depends(get_user
 @app.post("/institution/create")
 async def institution_create_post(
 		request: Request,
+		name: Annotated[str, Form()],
+		aba_routing_number: Annotated[Optional[int], Form()] = None,
+		user: User = Depends(get_user),
 		db: Session = Depends(get_db),
-		aba_routing_number: int = Form(...),
-		name: str = Form(...),
-		user: User = Depends(get_user)):
+	):
 	crud.institution_create(
 		aba_routing_number=aba_routing_number,
 		db=db,
@@ -553,14 +556,15 @@ async def transaction_create_get(
 
 @app.post("/transaction/create")
 async def transaction_create_post(
-	request: Request,
-	db: Session = Depends(get_db),
-	user: User = Depends(get_user),
-	category: str = Form(...),
-	sourcink_name_from: str = Form(...),
-	sourcink_name_to: str = Form(...),
-	amount: float = Form(...),
-	at: str = Form(...)):
+		request: Request,
+		category: Annotated[str, Form()],
+		sourcink_name_from: Annotated[str, Form()],
+		sourcink_name_to: Annotated[str, Form()],
+		amount: Annotated[float, Form()],
+		at: Annotated[str, Form()],
+		db: Session = Depends(get_db),
+		user: User = Depends(get_user),
+	):
 	at_date = datetime.date.fromisoformat(at)
 	at_datetime = datetime.datetime(
 		year=at_date.year,
