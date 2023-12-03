@@ -42,6 +42,7 @@ def account_create(db: Session, institution_id: int, name: str, user: models.Use
 	db.add(permission)
 	user.user_account_permissions.append(permission)
 	db.commit()
+	return account
 
 def account_get_by_id(db: Session, account_id: int) -> models.Account:
 	return db.query(models.Account).filter_by(id=account_id).first()
@@ -253,16 +254,17 @@ def transaction_list(db: Session,
 	
 	return query.all()
 
-def user_ensure_exists(db: Session, user: User) -> None:
+def user_ensure_exists(db: Session, user: User) -> models.User:
 	existing = user_get_by_username(db, user.username)
 	if existing:
-		return
-	user = models.User(
+		return existing
+	db_user = models.User(
 		email = user.email,
 		username = user.username,
 	)
-	db.add(user)
+	db.add(db_user)
 	db.commit()
+	return db_user
 
 def user_get_by_username(db: Session, username: str):
 	return db.query(models.User).filter(models.User.username == username).first()
