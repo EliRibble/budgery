@@ -57,9 +57,11 @@ class TestImport(unittest.IsolatedAsyncioTestCase):
 		def get_config_override() -> Config:
 			return Config("test.env")
 		app.dependency_overrides[get_config] = get_config_override
-		@app.on_event("startup")
-		def setup_for_tests() -> None:
-			LOGGER.info("Setup for tests")
+		#@app.on_event("startup")
+		#def setup_for_tests() -> None:
+			#LOGGER.info("Setup for tests")
+			# create_database(db_url=db_url)
+			# stamp_database(db_url=db_url)
 
 	def test_root(self):
 		with TestClient(app) as client:
