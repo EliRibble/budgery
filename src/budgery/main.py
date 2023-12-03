@@ -389,8 +389,9 @@ async def import_list_get(request: Request, db: Annotated[Session, Depends(get_d
 		db = db,
 		user = db_user,
 	)
+	imports_sorted = sorted(imports, key=lambda i: i.created, reverse=True)
 	return templates.TemplateResponse("import-list.html.jinja", {
-		"imports": imports,
+		"imports": imports_sorted,
 		"request": request,
 		"user": user,
 	})
