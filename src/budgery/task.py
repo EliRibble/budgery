@@ -3,18 +3,19 @@ import datetime
 import logging
 from pathlib import Path
 import tempfile
-from typing import List
+from typing import IO, List
 
 import magic
 
 from budgery.dataclasses import ImportRow
-from budgery.db import crud
+from budgery.db import crud, models
+from budgery.user import User
 import budgery.csv
 import budgery.xlsx
 
 LOGGER = logging.getLogger(__name__)
 
-def _extract_rows(f) -> List[ImportRow]:
+def _extract_rows(f: IO) -> List[ImportRow]:
 	"Extract the rows from an import file."
 	head = f.read(2048)
 	detected = magic.from_buffer(head)
@@ -35,11 +36,11 @@ def _extract_rows(f) -> List[ImportRow]:
 		raise Exception(f"No idea what to do with a '{detected}' file")
 
 async def process_transaction_upload(
-		import_file: tempfile.TemporaryFile,
-		db,
+		import_file: IO,
+		db: crud.Session,
 		filename: str,
-		import_job,
-		user,
+		import_job: models.ImportJob,
+		user: User,
 	) -> None:
 	# Immediately push this coroutine to the bottom of the stack.
 	await asyncio.sleep(0)
