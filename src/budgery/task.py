@@ -48,21 +48,21 @@ async def process_transaction_upload(
 	sourcink_unknown = crud.sourcink_get_or_create(db, "Unknown")
 	for row in rows:
 		if row.account_id_is_from:
-			account_id_from = account_id
+			account_id_from = import_job.account_id
 			account_id_to = None
 		else:
 			account_id_from = None
-			account_id_to = account_id
+			account_id_to = import_job.account_id
 		crud.transaction_create(
 			db=db,
-			description=description,
+			description=row.description,
 			account_id_from=account_id_from,
 			account_id_to=account_id_to,
-			amount=amount,
-			at=at,
+			amount=row.amount,
+			at=row.at,
 			category=None,
 			import_job=import_job,
 			sourcink_from=sourcink_unknown,
 			sourcink_to=sourcink_unknown,
 		)
-	import_job_finish(db, import_job)
+	crud.import_job_finish(db, import_job)
