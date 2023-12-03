@@ -11,8 +11,10 @@ from starlette.config import Config
 
 from budgery import task
 from budgery.main import app, get_config
-from budgery.db import connection as db_connection
-from budgery.db import crud
+from budgery.db import crud, models
+from budgery.db.connection import connect, Session
+from budgery.db.models import Base
+from budgery.user import User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -53,15 +55,62 @@ def test_american_express():
 class TestImport(unittest.IsolatedAsyncioTestCase):
 	def setUp(self):
 		logging.basicConfig(level=logging.INFO)
-		LOGGER.info("Doing setUp")
+		config = Config("test.env")
+		self.config = config
 		def get_config_override() -> Config:
-			return Config("test.env")
+			return config
 		app.dependency_overrides[get_config] = get_config_override
-		#@app.on_event("startup")
-		#def setup_for_tests() -> None:
-			#LOGGER.info("Setup for tests")
-			# create_database(db_url=db_url)
-			# stamp_database(db_url=db_url)
+		engine = connect(config)
+		Base.metadata.create_all(engine)
+		self.db = Session(engine)
+
+	async def test_import_amex_csv(self):
+		filename = "tests/import_data/amex.xlsx"
+		import_file = open(filename, "rb")
+		user = User(
+			auth_time=datetime.datetime.utcnow(),
+			email=None,
+			email_verified=False,
+			expiration=datetime.datetime.utcnow() + datetime.timedelta(days=1),
+			family_name="Tester",
+			given_name="Robert",
+			name="Bobby Tester",
+			disabled=False,
+			username="bobbytester",
+		)
+		db_user = crud.user_ensure_exists(self.db, user)
+		assert db_user
+		institution = crud.institution_create(
+			db=self.db,
+			user=db_user,
+			aba_routing_number=0,
+			name="test-institution",
+		)
+		account = crud.account_create(
+			db=self.db,
+			institution_id=institution.id,
+			name="test-account",
+			user=db_user,
+		)
+		import_job = crud.import_job_create(
+			account_id=account.id,
+			db=self.db,
+			filename=filename,
+			user=db_user,
+		)
+		await task.process_transaction_upload(
+			import_file=import_file,
+			db=self.db,
+			filename=filename,
+			import_job=import_job,
+			user=user,
+		)
+		import_job = crud.import_job_get_by_id(
+			db=self.db,
+			user=db_user,
+			import_job_id=import_job.id,
+		)
+		assert import_job.status == models.ImportJobStatus.finished
 
 	def test_root(self):
 		with TestClient(app) as client:

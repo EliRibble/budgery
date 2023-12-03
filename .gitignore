@@ -1,5 +1,7 @@
 __pycache__/
 budgery.egg-info/
 budgery.db
+budgery-test.db
 env
+test.env
 ve/

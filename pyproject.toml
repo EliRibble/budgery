@@ -27,3 +27,8 @@ dependencies = [
 	"uvicorn[standard]",
 	"wheel"
 ]
+[project.optional-dependencies]
+tests = [
+	"pytest",
+	"tox",
+]
