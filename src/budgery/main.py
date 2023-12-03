@@ -382,37 +382,54 @@ async def logout(request: Request):
 	request.session.pop("user", None)
 	return RedirectResponse(url="/")
 
-@app.get("/import")
-async def import_list_get(request: Request, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(get_user)]):
+@app.get("/import-job/{import_job_id:int}")
+async def import_job_get(
+		request: Request,
+		import_job_id: int,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
+	db_user = crud.user_get_by_username(db, user.username)
+	import_job = crud.import_job_get_by_id(
+		db=db,
+		user=db_user,
+		import_job_id=import_job_id)
+		
+	return templates.TemplateResponse("import-job.html.jinja", {
+		"import_job": import_job,
+		"request": request,
+		"user": user})
+
+@app.get("/import-job")
+async def import_job_list_get(request: Request, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	imports = crud.import_job_list(
 		db = db,
 		user = db_user,
 	)
 	imports_sorted = sorted(imports, key=lambda i: i.created, reverse=True)
-	return templates.TemplateResponse("import-list.html.jinja", {
+	return templates.TemplateResponse("import-job-list.html.jinja", {
 		"imports": imports_sorted,
 		"request": request,
 		"user": user,
 	})
 
-@app.get("/import/create")
-async def import_create_get(request: Request,
+@app.get("/import-job/create")
+async def import_job_create_get(request: Request,
 	db: Annotated[Session, Depends(get_db)],
 	user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	accounts = crud.account_list(db, db_user)
 	institutions = crud.institution_list(db)
 	institutions_by_id = {institution.id: institution for institution in institutions}
-	return templates.TemplateResponse("import-create.html.jinja", {
+	return templates.TemplateResponse("import-job-create.html.jinja", {
 		"accounts": accounts,
 		"institutions_by_id": institutions_by_id,
 		"request": request,
 		"user": user,
 	})
 
-@app.post("/import/create")
-async def import_create_post(
+@app.post("/import-job/create")
+async def import_job_create_post(
 		request: Request,
 		background_tasks: BackgroundTasks,
 		account_id: Annotated[int, Form()],
@@ -435,7 +452,7 @@ async def import_create_post(
 		import_job=import_job,
 		user=db_user,
 	)
-	return templates.TemplateResponse("import-create.html.jinja", {
+	return templates.TemplateResponse("import-job-create.html.jinja", {
 		"request": request,
 		"user": user,
 	})

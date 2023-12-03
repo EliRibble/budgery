@@ -1,7 +1,7 @@
 {% extends "base.html.jinja" %}
 {% from "macros/badges.html.jinja" import import_status_badge %}
 {% set breadcrumbs = [
-	("/import", "Imports"),
+	("/import-job", "Imports"),
 ] %}
 {% block header %}
 {% include "fragments/breadcrumb.html.jinja" %}
@@ -9,14 +9,14 @@
 {% block content %}
 <div class="row">
 	<div class="col s6">
-		<a class="btn-small waves-effect waves-light" href="/import/create"><i class="material-icons left">add</i>Create</a>
+		<a class="btn-small waves-effect waves-light" href="/import-job/create"><i class="material-icons left">add</i>Create</a>
 	</div>
 </div>
 {% if imports %}
 <div class="row">
 	<div class="collection">
 		{% for job in imports %}
-			<a href="/import/{{ job.id }}" class="collection-item">
+			<a href="/import-job/{{ job.id }}" class="collection-item">
 				{{ job.created }}
 				{{ import_status_badge(job.status) }}
 			</a>
@@ -24,6 +24,6 @@
 	</div>
 </div>
 {% else %}
-	<p>No imports yet, please <a href="/import/create">create one</a></p>
+	<p>No imports yet, please <a href="/import-job/create">create one</a></p>
 {% endif %}
 {% endblock %}

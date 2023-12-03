@@ -1,0 +1,41 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/import-job", "Import Jobs"),
+	("/import-job/{}".format(import_job.id), import_job.id),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block onready %}
+var elems = document.querySelectorAll('.fixed-action-btn');
+var instances = M.FloatingActionButton.init(elems, {});
+{% endblock %}
+
+{% block content %}
+{% if not import_job %}
+	<p>Sorry, an import job with that ID does not exist or you don't have access to it.</p>
+{% else %}
+<div class="fixed-action-btn">
+  <a class="btn-floating btn-large red" href="/import-job/create">
+    <i class="large material-icons">add</i>
+  </a>
+</div>
+
+<table>
+	<thead>
+		<tr>
+			<th>Property</th>
+			<th>Value</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>ID</td><td>{{ import_job.id }}</td></tr>
+		<tr><td>Account</td><td>{{ import_job.account_id }}</td></tr>
+		<tr><td>Created</td><td>{{ import_job.created }}</td></tr>
+		<tr><td>Status</td><td>{{ import_job.status }}</td></tr>
+	</tbody>
+</table>
+
+{% endif %}
+{% endblock %}
