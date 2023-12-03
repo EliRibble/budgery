@@ -155,6 +155,12 @@ def import_job_finish(db: Session, import_job: models.ImportJob) -> None:
 	import_job.status = models.ImportJobStatus.finished
 	db.commit()
 
+def import_job_get_by_id(
+		db: Session,
+		user: models.User,
+		import_job_id: int) -> models.ImportJob:
+	return db.query(models.ImportJob).filter_by(id=import_job_id).first()
+
 def import_job_list(
 		db: Session,
 		user: models.User,
