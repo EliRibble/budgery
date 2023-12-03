@@ -1,7 +1,9 @@
 {% macro import_status_badge(value) -%}
 {% if value.name == "started" %}
 	<span class="badge new">started</span>
+{% elif value.name == "finished" %}
+	<span class="badge new blue">finished</span>
 {% else %}
-	<span class="badge">{{ value.name }}</span>
+	<span class="badge new red">{{ value.name }}</span>
 {% endif %}
 {%- endmacro %}
