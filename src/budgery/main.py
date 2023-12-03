@@ -39,21 +39,20 @@ async def lifespan(app: FastAPI):
 	)
 	app.mount("/static", StaticFiles(directory="static"), name="static")
 	yield
+
 app = FastAPI(lifespan=lifespan)
 
 @lru_cache()
 def get_config():
 	return Config("env")
 
-config = get_config()
-app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
 
 @lru_cache()
 def get_db_engine(config: Annotated[Config, Depends(get_config)]) -> Engine:
 	return connect(config)
 
 def get_db(
-		config: Config = Depends(get_config),
+		config: Annotated[Config, Depends(get_config)],
 		db_engine = Depends(get_db_engine),
 	):
 	db = session(db_engine)
@@ -86,12 +85,19 @@ def _parse_user(user_data: Mapping[str, Union[int, str]]) -> User:
 		username = user_data["preferred_username"],)	
 	return user_model
 
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+@app.get("/")
+async def root(
+		request: Request,
+		user: Annotated[User, Depends(get_user)],
+	):
 	return templates.TemplateResponse("index.html.jinja", {"request": request, "user": user})
 
 @app.get("/account")
-async def account_list_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+async def account_list_get(
+		request: Request,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
+	):
 	institutions = crud.institution_list(db)
 	institutions_by_id = {i.id: i for i in institutions}
 	db_user = crud.user_get_by_username(db, user.username)
@@ -105,7 +111,7 @@ async def account_list_get(request: Request, db: Session = Depends(get_db), user
 		"user": user})
 
 @app.get("/account/create")
-async def accounts_create_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+async def account_create_get(request: Request, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(get_user)]):
 	institutions = crud.institution_list(db)
 	return templates.TemplateResponse("account-create.html.jinja", {
 		"institutions": institutions,
@@ -114,12 +120,12 @@ async def accounts_create_get(request: Request, db: Session = Depends(get_db), u
 	})
 
 @app.post("/account/create")
-async def accounts_create_post(
+async def account_create_post(
 		request: Request,
 		name: Annotated[str, Form],
 		institution_name: Annotated[str, Form],
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	institution = crud.institution_get_by_name(db, institution_name)
 	crud.account_create(
@@ -130,11 +136,20 @@ async def accounts_create_post(
 	)
 	return RedirectResponse(status_code=303, url="/account")
 
+@app.get("/account/{account_id}/edit")
+async def account_edit_get(request: Request, account_id: int, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(get_user)]):
+	account = crud.account_get_by_id(db, account_id)
+	return templates.TemplateResponse("account-edit.html.jinja", {
+		"account": account,
+		"current_page": "account",
+		"request": request,
+		"user": user_})
+
 @app.get("/account/{account_id}")
 async def account_get(request: Request,
 	account_id: int,
-	db: Session = Depends(get_db),
-	user: User = Depends(get_user)):
+	db: Annotated[Session, Depends(get_db)],
+	user: Annotated[User, Depends(get_user)]):
 	account = crud.account_get_by_id(db, account_id)
 	history = crud.account_history_list_by_account_id(db, account_id)
 	return templates.TemplateResponse("account.html.jinja", {
@@ -144,22 +159,13 @@ async def account_get(request: Request,
 		"request": request,
 		"user": user})
 
-@app.get("/account/{account_id}/edit")
-async def account_edit_get(request: Request, account_id: int, db: Session = Depends(get_db), user: User = Depends(get_user)):
-	account = crud.account_get_by_id(db, account_id)
-	return templates.TemplateResponse("account-edit.html.jinja", {
-		"account": account,
-		"current_page": "account",
-		"request": request,
-		"user": user_})
-
 @app.post("/account/{account_id}/edit")
-async def account_edit_post(
+async def account_update_post(
 		request: Request,
 		account_id: int,
 		name: Annotated[str, Form()],
 		institution_name: Annotated[str, Form()],
-		db: Session = Depends(get_db)):
+		db: Annotated[Session, Depends(get_db)]):
 	account = crud.account_get_by_id(db, account_id)
 	institution = crud.institution_get_by_name(db, institution_name)
 	crud.account_update(db,
@@ -169,17 +175,17 @@ async def account_edit_post(
 	)
 	return RedirectResponse(status_code=303, url=f"/account/{account.id}")
 
-@app.route("/allocation")
-async def allocation(request: Request, user: User = Depends(get_user)):
+@app.get("/allocation")
+async def allocation(request: Request, user: Annotated[User, Depends(get_user)]):
 	return templates.TemplateResponse("allocation-list.html.jinja", {
 		"current_page": "allocation",
 		"request": request,
 		"user": user})
 
-@app.get("/auth", response_class=HTMLResponse)
+@app.get("/auth")
 async def auth(request: Request,
-		db: Session = Depends(get_db),
-		oauth: OAuth = Depends(get_oauth)):
+		db: Annotated[Session, Depends(get_db)],
+		oauth: Annotated[OAuth, Depends(get_oauth)]):
 	try:
 		token = await oauth.oidc.authorize_access_token(request)
 	except OAuthError as error:
@@ -190,11 +196,11 @@ async def auth(request: Request,
 	request.session["user"] = dict(user)
 	return RedirectResponse(url="/")
 
-@app.get("/budget", response_class=HTMLResponse)
+@app.get("/budget")
 async def budget_list_get(
 		request: Request,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	budgets = db_user.budgets
 	return templates.TemplateResponse("budget-list.html.jinja", {
@@ -203,11 +209,11 @@ async def budget_list_get(
 		"request": request,
 		"user": user})
 
-@app.get("/budget/create", response_class=HTMLResponse)
+@app.get("/budget/create")
 async def budget_create_get(
 		request: Request,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	default_end_date = dates.this_month_end()
 	default_start_date = dates.this_month_start()
 	return templates.TemplateResponse("budget-create.html.jinja", {
@@ -221,8 +227,8 @@ async def budget_create_post(
 		request: Request,
 		end_date_str: Annotated[str, Form()],
 		start_date_str: Annotated[str, Form()],
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	end_date = datetime.date.fromisoformat(end_date_str)
 	start_date = datetime.date.fromisoformat(start_date_str)
@@ -233,12 +239,12 @@ async def budget_create_post(
 		user = db_user)
 	return RedirectResponse(status_code=303, url=f"/budget/{budget.id}")
 	
-@app.get("/budget/{budget_id}/entry/create", response_class=HTMLResponse)
+@app.get("/budget/{budget_id}/entry/create")
 async def budget_entry_create_get(
 		request: Request,
 		budget_id: int,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	budget = crud.budget_get_by_id(db, budget_id)
 	return templates.TemplateResponse("budget-entry-create.html.jinja", {
 		"budget": budget,
@@ -253,8 +259,8 @@ async def budget_entry_create_post(
 		category: Annotated[str, Form()],
 		entry_type: Annotated[str, Form()],
 		name: Annotated[str, Form()],
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user),
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
 	):
 	db_user = crud.user_get_by_username(db, user.username)
 	budget = crud.budget_get_by_id(db, budget_id)
@@ -284,8 +290,8 @@ async def budget_entry_update_post(
 		category: Annotated[str, Form()],
 		entry_type: Annotated[str, Form()],
 		name: Annotated[str, Form()],
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user),
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
 	):
 	db_user = crud.user_get_by_username(db, user.username)
 	if amount < 0:
@@ -307,8 +313,8 @@ async def budget_entry_update_post(
 async def budget_get(
 		request: Request,
 		budget_id: int,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	budget = crud.budget_get_by_id(db, budget_id)
 	entries = crud.budget_entry_list_by_budget(db, budget)
@@ -338,8 +344,8 @@ async def budget_entry_get(
 		request: Request,
 		budget_id: int,
 		entry_id: int,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	budget = crud.budget_get_by_id(db, budget_id)
 	entry = crud.budget_entry_get_by_id(db, entry_id)
@@ -355,8 +361,8 @@ async def budget_entry_get(
 @app.get("/category")
 async def category_list_get(
 		request: Request,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	user = request.session.get("user")
 	categories = crud.category_list(db, user)
 	return templates.TemplateResponse("category.html.jinja", {
@@ -365,19 +371,19 @@ async def category_list_get(
 		"request": request,
 		"user": user})
 
-@app.route("/login")
+@app.get("/login")
 async def login(request: Request):
 	oauth = get_oauth()
 	redirect_uri = request.url_for("auth")
 	return await oauth.oidc.authorize_redirect(request, redirect_uri)
 
-@app.route("/logout")
+@app.get("/logout")
 async def logout(request: Request):
 	request.session.pop("user", None)
 	return RedirectResponse(url="/")
 
 @app.get("/import")
-async def import_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+async def import_list_get(request: Request, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	imports = crud.import_job_list(
 		db = db,
@@ -391,8 +397,8 @@ async def import_get(request: Request, db: Session = Depends(get_db), user: User
 
 @app.get("/import/create")
 async def import_create_get(request: Request,
-	db: Session = Depends(get_db),
-	user: User = Depends(get_user)):
+	db: Annotated[Session, Depends(get_db)],
+	user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	accounts = crud.account_list(db, db_user)
 	institutions = crud.institution_list(db)
@@ -409,8 +415,8 @@ async def import_create_post(
 		request: Request,
 		background_tasks: BackgroundTasks,
 		account_id: Annotated[int, Form()],
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user),
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
 		import_file: UploadFile = File(...),
 	):
 	db_user = crud.user_get_by_username(db, user.username)
@@ -434,10 +440,10 @@ async def import_create_post(
 	})
 
 @app.get("/institution")
-async def institution_get(
+async def institution_list_get(
 		request: Request,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	institutions = crud.institution_list(db)
 	return templates.TemplateResponse("institution-list.html.jinja", {
 		"current_page": "institution",
@@ -446,7 +452,7 @@ async def institution_get(
 		"user": user})
 
 @app.get("/institution/create")
-async def institution_create_get(request: Request, user: User = Depends(get_user)):
+async def institution_create_get(request: Request, user: Annotated[User, Depends(get_user)]):
 	return templates.TemplateResponse("institution-create.html.jinja", {
 		"current_page": "institution",
 		"request": request,
@@ -454,11 +460,11 @@ async def institution_create_get(request: Request, user: User = Depends(get_user
 
 @app.post("/institution/create")
 async def institution_create_post(
+		user: Annotated[User, Depends(get_user)],
+		db: Annotated[Session, Depends(get_db)],
 		request: Request,
 		name: Annotated[str, Form()],
 		aba_routing_number: Annotated[Optional[int], Form()] = None,
-		user: User = Depends(get_user),
-		db: Session = Depends(get_db),
 	):
 	crud.institution_create(
 		aba_routing_number=aba_routing_number,
@@ -469,17 +475,17 @@ async def institution_create_post(
 	return RedirectResponse(status_code=303, url="/institution")
 
 @app.get("/report")
-async def report(request: Request, user: User = Depends(get_user)):
+async def report_list_get(request: Request, user: Annotated[User, Depends(get_user)]):
 	return templates.TemplateResponse("report.html.jinja", {
 		"current_page": "report",
 		"request": request,
 		"user": user})
 
-@app.get("/sourcink", response_class=HTMLResponse)
-async def sourcinks_list_get(
+@app.get("/sourcink")
+async def sourcink_list_get(
 		request: Request,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user),
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
 		name: str = ""):
 	"Get list of sourcinks."
 	db_user = crud.user_get_by_username(db, user.username)
@@ -491,12 +497,12 @@ async def sourcinks_list_get(
 		"user": user,
 	})
 	
-@app.get("/sourcink/{sourcink_id}", response_class=HTMLResponse)
-async def sourcinks_get(
+@app.get("/sourcink/{sourcink_id}")
+async def sourcink_get(
 		request: Request,
 		sourcink_id: int,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user),
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
 		name: str = ""):
 	"Get a specific sourcink."
 	db_user = crud.user_get_by_username(db, user.username)
@@ -509,20 +515,21 @@ async def sourcinks_get(
 	})
 	
 @app.get("/tag")
-async def tag(request: Request, user: User = Depends(get_user)):
+async def tag_list_get(request: Request, user: Annotated[User, Depends(get_user)]):
 	return templates.TemplateResponse("tag.html.jinja", {
 		"current_page": "tag",
 		"request": request,
 		"user": user})
 
-@app.get("/transaction", response_class=HTMLResponse)
+@app.get("/transaction")
 async def transaction_list_get(
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
 		request: Request,
 		at_end: Optional[str] = None,
 		at_start: Optional[str] = None,
 		category: Optional[str] = None,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+	):
 
 	at = crud.DatetimeRange(
 		end=dates.parse(at_end) if at_end else None,
@@ -544,8 +551,8 @@ async def transaction_list_get(
 @app.get("/transaction/create")
 async def transaction_create_get(
 		request: Request,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	categories = crud.category_list(db, db_user)
 	sourcinks = crud.sourcink_list(db, db_user)
@@ -564,8 +571,8 @@ async def transaction_create_post(
 		sourcink_name_to: Annotated[str, Form()],
 		amount: Annotated[float, Form()],
 		at: Annotated[str, Form()],
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user),
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
 	):
 	at_date = datetime.date.fromisoformat(at)
 	at_datetime = datetime.datetime(
@@ -589,8 +596,8 @@ async def transaction_create_post(
 @app.get("/transaction/rule")
 async def transaction_rule_list_get(
 		request: Request,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	sourcinks = crud.sourcink_list(db, db_user)
 	return templates.TemplateResponse("transaction-create.html.jinja", {
@@ -604,8 +611,8 @@ async def transaction_rule_list_get(
 async def transaction_get(
 		request: Request,
 		transaction_id: int,
-		db: Session = Depends(get_db),
-		user: User = Depends(get_user)):
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
 	transaction = crud.transaction_get_by_id(db, transaction_id)
 	return templates.TemplateResponse("transaction.html.jinja", {
 		"current_page": "account",
@@ -614,7 +621,7 @@ async def transaction_get(
 		"user": user})
 
 @app.get("/user")
-async def user_get(request: Request, db: Session = Depends(get_db), user: User = Depends(get_user)):
+async def user_get(request: Request, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(get_user)]):
 	user_data = request.session.get("user")
 	db_user = crud.user_get_by_username(db, user.username)
 	return templates.TemplateResponse("user.html.jinja", {
@@ -623,3 +630,6 @@ async def user_get(request: Request, db: Session = Depends(get_db), user: User =
 		"request": request,
 		"user": user,
 		"user_data": user_data,})
+
+config = get_config()
+app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
