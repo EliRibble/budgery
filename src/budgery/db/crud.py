@@ -39,6 +39,7 @@ def account_create(db: Session, institution_id: int, name: str, user: models.Use
 	)
 	db.add(account)
 	db.add(sourcink)
+	db.add(permission)
 	user.user_account_permissions.append(permission)
 	db.commit()
 
