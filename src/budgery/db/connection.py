@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.engine.base import Engine
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from starlette.config import Config
 
 from budgery.db.history_meta import versioned_session

@@ -10,14 +10,14 @@ from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, Request, Uplo
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
 from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
+from starlette.routing import Route
 
 from budgery import custom_filters, dates, task
-from budgery.db import connection as db_connection
 from budgery.db import crud
+from budgery.db.connection import connect, Engine, session, Session
 from budgery.user import User
 
 LOGGER = logging.getLogger(__name__)
@@ -49,14 +49,14 @@ config = get_config()
 app.add_middleware(SessionMiddleware, secret_key=config("SECRET_KEY"))
 
 @lru_cache()
-def get_db_engine(config: Config = Depends(get_config)):
-	return db_connection.connect(config)
+def get_db_engine(config: Annotated[Config, Depends(get_config)]) -> Engine:
+	return connect(config)
 
 def get_db(
 		config: Config = Depends(get_config),
 		db_engine = Depends(get_db_engine),
 	):
-	db = db_connection.session(db_engine)
+	db = session(db_engine)
 	try:
 		yield db
 	finally:
