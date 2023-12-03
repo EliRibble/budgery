@@ -16,8 +16,9 @@ class Item(ItemBase):
 	id: int
 	owner_id: int
 
-	class Config:
-		from_attributes = True
+	model_config = {
+		"from_attributes": True
+	}
 
 
 class UserBase(BaseModel):
@@ -33,5 +34,6 @@ class User(UserBase):
 	is_active: bool
 	items: List[Item] = []
 
-	class Config:
-		from_attributes = True
+	model_config = {
+		"from_attributes": True
+	}
