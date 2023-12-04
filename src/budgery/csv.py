@@ -15,7 +15,10 @@ LOGGER = logging.getLogger(__name__)
 	# @abstractmethod __iter__(self) -> 
 def _process_afcu_transaction(data: Mapping[str, str]) -> Optional[ImportRow]:
 	"Process a single line of an America First Credit Union CSV."
-	at = datetime.datetime.strptime(data["Date"], "%m/%d/%Y")
+	try:
+		at = datetime.datetime.strptime(data["Date"], "%m/%d/%Y")
+	except ValueError:
+		raise ValueError(f"Failed to parse timestame {data['Date']}")
 	description = data["Description"]
 	if "Pending -" in description:
 		return
@@ -160,7 +163,13 @@ def extract_rows(content: bytes) -> List[ImportRow]:
 	# Fix bad files where the fields end up with whitespace, like Ally
 	reader.fieldnames = [f.strip() for f in reader.fieldnames]
 	processor = _processor_from_header(tuple(reader.fieldnames))
-	rows = [processor(line) for line in reader]
+	rows = []
+	for i, line in enumerate(reader):
+		try:
+			rows.append(processor(line))
+		except ValueError as x:
+			LOGGER.error("Failed to parse line %d: %s", i, line)
+			raise
 	# Remove empty rows caused by the processor dropping a row
 	rows = [r for r in rows if r]
 	return rows

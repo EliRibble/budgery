@@ -151,6 +151,10 @@ def import_job_create(account_id: int, db: Session, filename: str, user: models.
 	db.commit()
 	return job
 
+def import_job_error(db: Session, import_job: models.ImportJob, error: models.ImportJobError) -> None:
+	import_job.error = error
+	db.commit()
+
 def import_job_finish(db: Session, import_job: models.ImportJob) -> None:
 	import_job.status = models.ImportJobStatus.finished
 	db.commit()
