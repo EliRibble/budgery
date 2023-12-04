@@ -2,13 +2,21 @@ import datetime
 import enum
 from typing import Optional
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Enum, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum, Float, ForeignKey, Integer, MetaData, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import backref, declarative_base, relationship
 
 from budgery.db.history_meta import Versioned
 
 Base = declarative_base()
+NAMING_CONVENTION = {
+    "ix": 'ix_%(column_0_label)s',
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
+}
+Base.metadata = MetaData(naming_convention=NAMING_CONVENTION)
 
 class Account(Versioned, Base):
 	__tablename__ = "account"
