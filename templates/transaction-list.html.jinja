@@ -2,6 +2,7 @@
 {% set breadcrumbs = [
 	("/transaction", "Transactions"),
 ] %}
+{% from "macros/tables.html.jinja" import table_transactions %}
 {% block header %}
 {% include "fragments/breadcrumb.html.jinja" %}
 {% endblock %}
@@ -29,30 +30,7 @@
 	</form>
 </div>
 {% if transactions %}
-<div class="row">
-	<table>
-		<thead>
-			<tr>
-				<th>ID</th>
-				<th>Amount</th>
-				<th>Category</th>
-				<th>Description</th>
-				<th>Date</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for txn in transactions %}
-				<tr>
-					<td><a href="/transaction/{{ txn.id }}">{{ txn.id }}</a></td>
-					<td>{{ txn.amount|currency }}</td>
-					<td>{{ txn.category }}</td>
-					<td>{{ txn.description }}</td>
-					<td>{{ txn.at.date() }}</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-</div>
+{{ table_transactions(transactions) }}
 {% else %}
 	<p>No transactions yet, please <a href="/transaction/create">create one</a></p>
 {% endif %}

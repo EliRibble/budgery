@@ -398,10 +398,14 @@ async def import_job_get(
 		db=db,
 		user=db_user,
 		import_job_id=import_job_id)
-		
+	transactions = crud.transaction_list_by_import_job(
+		db=db,
+		import_job_id=import_job_id
+	)
 	return templates.TemplateResponse("import-job.html.jinja", {
 		"import_job": import_job,
 		"request": request,
+		"transactions": transactions,
 		"user": user})
 
 @app.get("/import-job")

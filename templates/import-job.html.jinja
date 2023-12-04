@@ -3,6 +3,7 @@
 	("/import-job", "Import Jobs"),
 	("/import-job/{}".format(import_job.id), import_job.id),
 ] %}
+{% from "macros/tables.html.jinja" import table_transactions %}
 {% block header %}
 {% include "fragments/breadcrumb.html.jinja" %}
 {% endblock %}
@@ -37,5 +38,7 @@ var instances = M.FloatingActionButton.init(elems, {});
 	</tbody>
 </table>
 
+<h2>Transactions</h2>
+{{ table_transactions(transactions) }}
 {% endif %}
 {% endblock %}
