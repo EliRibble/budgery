@@ -137,7 +137,12 @@ async def account_create_post(
 	return RedirectResponse(status_code=303, url="/account")
 
 @app.get("/account/{account_id}/edit")
-async def account_edit_get(request: Request, account_id: int, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(get_user)]):
+async def account_edit_get(
+		request: Request,
+		account_id: int,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]
+	):
 	account = crud.account_get_by_id(db, account_id)
 	return templates.TemplateResponse("account-edit.html.jinja", {
 		"account": account,
