@@ -264,6 +264,13 @@ def transaction_list(db: Session,
 	
 	return query.all()
 
+def transaction_list_by_import_job(
+		db: Session,
+		import_job_id: int,
+	):
+	query = db.query(models.Transaction).order_by(models.Transaction.at.desc()).filter_by(import_job_id=import_job_id)
+	return query.all()
+
 def user_ensure_exists(db: Session, user: User) -> models.User:
 	existing = user_get_by_username(db, user.username)
 	if existing:
