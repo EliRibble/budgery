@@ -111,6 +111,12 @@ class TestImport(unittest.IsolatedAsyncioTestCase):
 			import_job_id=import_job.id,
 		)
 		assert import_job.status == models.ImportJobStatus.finished
+		transactions = crud.transaction_list_by_import_job(
+			db=self.db,
+			import_job_id=import_job.id,
+		)
+		assert len(transactions) == 14
+
 
 	def test_root(self):
 		with TestClient(app) as client:
