@@ -168,7 +168,7 @@ def import_job_list(
 	return db.query(models.ImportJob).order_by(models.ImportJob.created).all()
 
 def institution_get_by_name(db: Session, name: str) -> models.Institution:
-	return db.query(models.Institution).filter(name==name).first()
+	return db.query(models.Institution).filter_by(name=name).first()
 
 def institution_list(db: Session):
 	return db.query(models.Institution).all()
