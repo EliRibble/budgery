@@ -2,9 +2,12 @@ import codecs
 import csv
 import datetime
 import io
+import logging
 from typing import Iterable, List, Mapping, Optional, Tuple
 
 from budgery.dataclasses import ImportRow
+
+LOGGER = logging.getLogger(__name__)
 
 # Fake type definitions for CSV classes which are implemented in C and
 # the classes are *not* exposed anywhere.
