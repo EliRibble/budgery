@@ -15,6 +15,7 @@ class Account(Versioned, Base):
 
 	id = Column(Integer, primary_key=True, index=True)
 	created = Column(DateTime, default=datetime.datetime.now)
+	deleted = Column(DateTime, nullable=True, default=None)
 	institution_id = Column(Integer, ForeignKey("institution.id"))
 	name = Column(String)
 
