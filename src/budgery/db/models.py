@@ -211,14 +211,6 @@ class Transaction(Base):
 		self.sourcink_from = sourcink_from
 		self.sourcink_to = sourcink_to
 		
-class TransactionRule(Base):
-	"Rules for how to manipulate transactions when created or imported."
-	__tablename__ = "transaction_rule"
-
-	id = Column(Integer, primary_key=True, index=True)
-	description_pattern = Column(String(), nullable=True)
-	
-
 class User(Base):
 	__tablename__ = "user"
 
