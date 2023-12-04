@@ -150,6 +150,21 @@ async def account_edit_get(
 		"request": request,
 		"user": user_})
 
+@app.post("/account/{account_id}/delete")
+async def account_delete_post(
+		request: Request,
+		account_id: int,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]
+	):
+	account = crud.account_get_by_id(db, account_id)
+	institution = crud.institution_get_by_name(db, institution_name)
+	crud.account_update(db,
+		account=account,
+		deleted=datetime.datetime.utcnow(),
+	)
+	return RedirectResponse(status_code=303, url=f"/account")
+
 @app.get("/account/{account_id}")
 async def account_get(request: Request,
 	account_id: int,
