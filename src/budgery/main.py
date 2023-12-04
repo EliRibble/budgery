@@ -223,8 +223,9 @@ async def budget_list_get(
 		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
 	budgets = db_user.budgets
+	sorted_budgets = sorted(budgets, key=lambda b: b.start_date, reverse=True)
 	return templates.TemplateResponse("budget-list.html.jinja", {
-		"budgets": budgets,
+		"budgets": sorted_budgets,
 		"current_page": "budget",
 		"request": request,
 		"user": user})
