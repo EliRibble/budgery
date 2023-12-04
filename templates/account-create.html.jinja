@@ -7,17 +7,6 @@
 {% include "fragments/breadcrumb.html.jinja" %}
 {% endblock %}
 
-{% block onready %}
-var element = document.getElementById("institution");
-M.Autocomplete.init(element, {
-	data: {
-		{% for institution in institutions %}
-			"{{ institution.name }}": null,
-		{% endfor %}
-	}
-});
-{% endblock %}
-
 {% block content %}
 {% if not institutions %}
 	<p>This system does not have any institutions yet. You can't create an account without one. Please create one <a href="/institution/create">here</a></p>.
@@ -34,10 +23,15 @@ M.Autocomplete.init(element, {
 		<div class="row">
 			<div class="input-field col s6">
 				<i class="material-icons prefix">account_balance</i>
-				<input placeholder="Bank of the Internet" id="institution" name="institution_name" type="text" class="autocomplete">
+				<input placeholder="Bank of the Internet" id="institution" name="institution_name" type="text" list="institution-list">
 				<a class="btn-floating disabled"><i class="material-icons">add</i></a>
 				<label for="name">Institution</label>
 			</div>
+			<datalist id="institution-list">
+				{% for institution in institutions %}
+					<option>{{ institution.name }}</option>
+				{% endfor %}
+			</datalist>
 		</div>
 		<button class="btn waves-effect waves-light" type="submit">Submit
 			<i class="material-icons right">send</i>
