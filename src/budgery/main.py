@@ -15,7 +15,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 from starlette.routing import Route
 
-from budgery import custom_filters, dates, task
+from budgery import custom_filters, dates, task, util
 from budgery.db import crud
 from budgery.db.connection import connect, Engine, session, Session
 from budgery.user import User
@@ -512,6 +512,27 @@ async def institution_create_post(
 		user=user,
 	)
 	return RedirectResponse(status_code=303, url="/institution")
+
+@app.get("/process")
+async def process_get(
+		request: Request,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
+	):
+	db_user = crud.user_get_by_username(db, user.username)
+	budgets = db_user.budgets
+	sorted_budgets = sorted(budgets, key=lambda b: b.start_date, reverse=True)
+	transactions = crud.transaction_list(
+		db=db,
+		category=None,
+		at=None,
+	)
+	transaction_count_by_budget_id = util.transaction_count_by_budget_id(budgets, transactions)
+	return templates.TemplateResponse("process.html.jinja", {
+		"budgets": sorted_budgets,
+		"request": request,
+		"transaction_count_by_budget_id": transaction_count_by_budget_id,
+		"user": user})
 
 @app.get("/report")
 async def report_list_get(request: Request, user: Annotated[User, Depends(get_user)]):
