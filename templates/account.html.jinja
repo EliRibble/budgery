@@ -11,7 +11,14 @@
 {% if not account %}
 	<p>Sorry, an account with that ID does not exist or you don't have access to it.</p>
 {% else %}
-<a href="/account/{{ account.id }}/edit">Edit</a>
+<div class="row">
+	<div class="col s3">
+		<a class="btn-small waves-effect waves-light" href="/account/{{ account.id }}/edit"><i class="material-icons left">add</i>Edit</a>
+	</div>
+	<div class="col s3">
+		<a class="btn-small waves-effect waves-light red" href="/account/{{ account.id }}/delete"><i class="material-icons left">import_export</i>Delete</a>
+	</div>
+</div>
 <table>
 	<thead>
 		<tr>
