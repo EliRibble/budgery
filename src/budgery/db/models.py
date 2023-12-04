@@ -101,12 +101,19 @@ class ImportJobStatus(enum.Enum):
 	started = 1
 	finished = 2
 
+class ImportJobError(enum.Enum):
+	# No error
+	NONE = 0
+	# A file we recognize but we failed to parse it correctly.
+	FAILED_PARSING_FILE = 1
+
 class ImportJob(Base):
 	"A background task to import a large set of transactions."
 	__tablename__ = "import_job"
 	id = Column(Integer, primary_key=True, index=True)
 	account_id = Column(Integer, ForeignKey("account.id"), nullable=True)
 	created = Column(DateTime, default=datetime.datetime.now)
+	error = Column(Enum(ImportJobError), default=ImportJobError.NONE)
 	filename = Column(String)
 	status = Column(Enum(ImportJobStatus))
 	user_id = Column(Integer, ForeignKey("user.id"))
