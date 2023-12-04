@@ -122,8 +122,8 @@ async def account_create_get(request: Request, db: Annotated[Session, Depends(ge
 @app.post("/account/create")
 async def account_create_post(
 		request: Request,
-		name: Annotated[str, Form],
-		institution_name: Annotated[str, Form],
+		name: Annotated[str, Form()],
+		institution_name: Annotated[str, Form()],
 		db: Annotated[Session, Depends(get_db)],
 		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
