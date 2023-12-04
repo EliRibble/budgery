@@ -22,9 +22,9 @@ def _extract_rows(f: IO) -> List[ImportRow]:
 	parts = []
 	while True:
 		p = f.read(2048 * 8)
-		if p:
-			parts.append(p)
-		break
+		if not p:
+			break
+		parts.append(p)
 	content = head + b''.join(parts)
 	f.seek(0)
 	
