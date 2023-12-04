@@ -461,10 +461,7 @@ async def import_job_create_post(
 		import_job=import_job,
 		user=db_user,
 	)
-	return templates.TemplateResponse("import-job-create.html.jinja", {
-		"request": request,
-		"user": user,
-	})
+	return RedirectResponse(status_code=303, url=f"/import-job/{import_job.id}")
 
 @app.get("/institution")
 async def institution_list_get(
