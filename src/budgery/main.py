@@ -253,12 +253,12 @@ async def budget_create_post(
 	db_user = crud.user_get_by_username(db, user.username)
 	end_date = datetime.date.fromisoformat(end_date_str)
 	start_date = datetime.date.fromisoformat(start_date_str)
-	crud.budget_create(
+	budget = crud.budget_create(
 		db = db,
 		end_date = end_date,
 		start_date = start_date,
 		user = db_user)
-	return RedirectResponse(status_code=303, url=f"/budget/{budget.id}")
+	return RedirectResponse(status_code=303, url=f"/budget")
 	
 @app.get("/budget/{budget_id}/entry/create")
 async def budget_entry_create_get(
