@@ -590,7 +590,7 @@ async def process_get(
 	sorted_budgets = sorted(budgets, key=lambda b: b.start_date, reverse=True)
 	transactions = crud.transaction_list(
 		db=db,
-		category=None,
+		category="None",
 		at=None,
 	)
 	transaction_count_by_budget_id = util.transaction_count_by_budget_id(budgets, transactions)
