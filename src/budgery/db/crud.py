@@ -1,7 +1,7 @@
 import dataclasses
 import datetime
 import logging
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Set
 
 from sqlalchemy import func, update
 from sqlalchemy.orm import Session
@@ -247,6 +247,25 @@ def transaction_create(
 def transaction_get_by_id(db: Session, transaction_id: int) -> models.Transaction:
 	return db.query(models.Transaction).filter_by(id=transaction_id).first()
 
+def transaction_get_categories(
+		db: Session,
+		) -> Set[str]:
+	query = (db.query(models.Transaction).distinct(models.Transaction.category))
+	return {t.category for t in query.all()}
+
+def transaction_get_one(
+		db: Session,
+		start: datetime.date,
+		end: datetime.date,
+		category: Optional[str],
+	) -> models.Transaction:
+	query = (db.query(models.Transaction)
+		.filter(models.Transaction.at>=start)
+		.filter(models.Transaction.at<end)
+		.filter(models.Transaction.category==None))
+	return query.first()
+
+
 def transaction_list(db: Session,
 		category: Optional[str] = None,
 		at: Optional[DatetimeRange] = None,
@@ -270,6 +289,18 @@ def transaction_list_by_import_job(
 	):
 	query = db.query(models.Transaction).order_by(models.Transaction.at.desc()).filter_by(import_job_id=import_job_id)
 	return query.all()
+
+def transaction_update(
+		db: Session,
+		transaction: models.Transaction,
+		category: str,
+		sourcink_id_from: Optional[int],
+		sourcink_id_to: Optional[int],
+	) -> None:
+	transaction.category = category
+	transaction.sourcink_id_from = sourcink_id_from
+	transaction.sourcink_id_to = sourcink_id_to
+	db.commit()
 
 def user_ensure_exists(db: Session, user: User) -> models.User:
 	existing = user_get_by_username(db, user.username)

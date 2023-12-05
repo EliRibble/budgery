@@ -535,6 +535,28 @@ async def process_get(
 		"transaction_count_by_budget_id": transaction_count_by_budget_id,
 		"user": user})
 
+@app.get("/process/{budget_id:int}")
+async def process_budget_get(
+		request: Request,
+		budget_id: int,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)],
+	):
+	db_user = crud.user_get_by_username(db, user.username)
+	budget = crud.budget_get_by_id(db, budget_id)
+	transaction = crud.transaction_get_one(db, budget.start_date, budget.end_date, None)
+	account = crud.account_get_by_id(db, transaction.account_id_to or transaction.account_id_from)
+	institution = account.institution
+	categories = crud.transaction_get_categories(db)
+	return templates.TemplateResponse("process-budget.html.jinja", {
+		"account": account,
+		"budget": budget,
+		"categories": categories,
+		"institution": institution,
+		"request": request,
+		"transaction": transaction,
+		"user": user})
+
 @app.get("/report")
 async def report_list_get(request: Request, user: Annotated[User, Depends(get_user)]):
 	return templates.TemplateResponse("report.html.jinja", {
@@ -680,6 +702,43 @@ async def transaction_get(
 		"request": request,
 		"transaction": transaction,
 		"user": user})
+
+@app.post("/transaction/{transaction_id}/edit")
+async def transaction_update_post(
+		request: Request,
+		transaction_id: int,
+		category: Annotated[str, Form()],
+		sourcink_name: Annotated[str, Form()],
+		db: Annotated[Session, Depends(get_db)],
+	):
+	transaction = crud.transaction_get_by_id(db, transaction_id)
+	sourcink = crud.sourcink_get_or_create(db, sourcink_name)
+	if transaction.amount > 0:
+		sourcink_id_from = None
+		sourcink_id_to = sourcink.id
+	else:
+		sourcink_id_from = sourcink.id
+		sourcink_id_to = None
+	crud.transaction_update(db,
+		transaction=transaction,
+		category=category,
+		sourcink_id_from=sourcink_id_from,
+		sourcink_id_to=sourcink_id_to,
+	)
+	return RedirectResponse(status_code=303, url=f"/process")
+
+async def transaction_edit_get(
+		request: Request,
+		account_id: int,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]
+	):
+	account = crud.account_get_by_id(db, account_id)
+	return templates.TemplateResponse("account-edit.html.jinja", {
+		"account": account,
+		"current_page": "account",
+		"request": request,
+		"user": user_})
 
 @app.get("/user")
 async def user_get(request: Request, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(get_user)]):

@@ -1,0 +1,65 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/process", "Process"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block content %}
+<h1>Budget {{ budget.start_date.isoformat() }} - {{ budget.end_date.isoformat() }}</h1>
+<table>
+	<tbody>
+		<tr>
+			<td>Institution:</td>
+			<td>{{ institution.name }}</td>
+		</tr>
+		<tr>
+			<td>Account:</td>
+			<td>{{ account.name }}</td>
+		</tr>
+		<tr>
+			<td>Amount:</td>
+			<td>{{ transaction.amount }}</td>
+		</tr>
+		<tr>
+			<td>When</td>
+			<td>{{ transaction.at.isoformat() }}</td>
+		</tr>
+		<tr>
+			<td>Description</td>
+			<td>{{ transaction.description }}</td>
+		</tr>
+		<tr>
+			<td>Category</td>
+			<td>{{ transaction.category }}</td>
+		</tr>
+	</tbody>
+</table>
+<div class="row">
+	<form class="col s12" action="/transaction/{{ transaction.id }}/edit" method="POST">
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">assignment</i>
+				<input placeholder="" name="category" type="text" class="validate" list="category-list" autofocus>
+				<label for="category">Category</label>
+			</div>
+			<datalist id="category-list">
+				{% for category in categories %}
+					<option>{{ category }}</option>
+				{% endfor %}
+			</datalist>
+		</div>
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">swap_horiz</i>
+				<input placeholder="" name="sourcink_name" type="text" class="validate">
+				<label for="sourcink_name">Sourcink</label>
+			</div>
+		</div>
+		<button class="btn waves-effect waves-light" type="submit">Submit
+			<i class="material-icons right">send</i>
+		</button>
+	</form>
+</div>
+{% endblock %}

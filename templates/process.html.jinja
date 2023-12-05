@@ -8,6 +8,7 @@
 
 {% block content %}
 <p>This is where we can quickly process through transactions we've imported and get them added to a budget.</p>
+<p>Transactions with no matching budget: {{ transaction_count_by_budget_id[None] }}</p>
 <table>
 	<thead>
 		<tr>
@@ -20,10 +21,14 @@
 	<tbody>
 		{% for budget in budgets %}
 			<tr>
-				<td><a href="/budget/{{ budget.id }}">{{ budget.id }}</a></td>
+				<td><a href="/process/{{ budget.id }}">{{ budget.id }}</a></td>
 				<td>{{ budget.start_date.isoformat() }}</td>
 				<td>{{ budget.end_date.isoformat() }}</td>
-				<td>{{ transaction_count_by_budget_id[budget.id] }}</td>
+				<td>
+					<a href="/process/{{ budget.id }}">
+						{{ transaction_count_by_budget_id[budget.id] }}
+					</a>
+				</td>
 			</tr>
 		{% endfor %}
 	</tbody>
