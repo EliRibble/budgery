@@ -98,6 +98,7 @@ class TestImport(unittest.IsolatedAsyncioTestCase):
 			filename=filename,
 			user=db_user,
 		)
+		assert import_job.account_id == account.id
 		await task.process_transaction_upload(
 			import_file=import_file,
 			db=self.db,

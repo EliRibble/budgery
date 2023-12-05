@@ -123,6 +123,7 @@ class ImportJob(Base):
 		filename: str,
 		status: ImportJobStatus,
 		user: "User") -> None:
+		self.account_id = account_id
 		self.filename = filename
 		self.status = status
 		self.user = user
@@ -232,6 +233,7 @@ BudgetPermission.user = relationship(User,
 	backref=backref("user_budget_permissions", cascade="all, delete-orphan"))
 BudgetEntry.budget = relationship(Budget)
 BudgetEntry.transactions = relationship(Transaction)
+ImportJob.account = relationship(Account)
 ImportJob.transactions = relationship(Transaction)
 ImportJob.user = relationship(User)
 Sourcink.account = relationship(Account)
