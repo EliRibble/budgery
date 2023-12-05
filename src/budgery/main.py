@@ -775,16 +775,17 @@ async def transaction_update_post(
 		request: Request,
 		transaction_id: int,
 		category: Annotated[str, Form()],
-		sourcink_name: Annotated[str, Form()],
 		db: Annotated[Session, Depends(get_db)],
+		budget_id: Annotated[Optional[str], Form()] = None,
+		sourcink_name: Annotated[Optional[str], Form()] = None,
 	):
 	transaction = crud.transaction_get_by_id(db, transaction_id)
-	sourcink = crud.sourcink_get_or_create(db, sourcink_name)
+	sourcink = crud.sourcink_get_or_create(db, sourcink_name) if sourcink_name is not None else None
 	if transaction.amount > 0:
 		sourcink_id_from = None
-		sourcink_id_to = sourcink.id
+		sourcink_id_to = sourcink.id if sourcink else None
 	else:
-		sourcink_id_from = sourcink.id
+		sourcink_id_from = sourcink.id if sourcink else None
 		sourcink_id_to = None
 	crud.transaction_update(db,
 		transaction=transaction,
@@ -792,7 +793,8 @@ async def transaction_update_post(
 		sourcink_id_from=sourcink_id_from,
 		sourcink_id_to=sourcink_id_to,
 	)
-	return RedirectResponse(status_code=303, url=f"/process")
+	url = f"/process/{budget_id}" if budget_id else "/process"
+	return RedirectResponse(status_code=303, url=url)
 
 async def transaction_edit_get(
 		request: Request,
