@@ -765,7 +765,23 @@ async def transaction_get(
 		user: Annotated[User, Depends(get_user)]):
 	transaction = crud.transaction_get_by_id(db, transaction_id)
 	return templates.TemplateResponse("transaction.html.jinja", {
-		"current_page": "account",
+		"current_page": "transaction",
+		"request": request,
+		"transaction": transaction,
+		"user": user})
+
+@app.get("/transaction/{transaction_id}/edit")
+async def transaction_get(
+		request: Request,
+		transaction_id: int,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
+	transaction = crud.transaction_get_by_id(db, transaction_id)
+	account_from = crud.account_get_by_id(db, transaction.account_id_from) if transaction.account_id_from else None
+	account_to = crud.account_get_by_id(db, transaction.account_id_to) if transaction.account_id_to else None
+	return templates.TemplateResponse("transaction-edit.html.jinja", {
+		"account_from": account_from,
+		"account_to": account_to,
 		"request": request,
 		"transaction": transaction,
 		"user": user})

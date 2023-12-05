@@ -1,0 +1,46 @@
+{% extends "base.html.jinja" %}
+{% block content %}
+<div class="row">
+	<form class="col s12" action="/transaction/{{ transaction.id }}/edit" method="POST">
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">assignment</i>
+				<input placeholder="1.23" name="amount" type="text" value="{{ transaction.amount }}">
+				<label for="amount">amount</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s12">
+				<i class="material-icons prefix">assignment</i>
+				<input placeholder="for lemonade" name="description" type="text" value="{{ transaction.description }}">
+				<label for="description">description</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">assignment</i>
+				<input placeholder="bills" name="category" type="text" value="{{ transaction.category }}">
+				<label for="category">category</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">assignment</i>
+				<input placeholder="Savings" name="account_from" type="text" value="{{ account_from.name }}">
+				<label for="name">from account</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s6">
+				<i class="material-icons prefix">transaction</i>
+				<input placeholder="Bank of the Internet" name="account_to" type="text" value="{{ account_to.name }}">
+				<a class="btn-floating disabled"><i class="material-icons">add</i></a>
+				<label for="name">to account</label>
+			</div>
+		</div>
+		<button class="btn waves-effect waves-light" type="submit">Submit
+			<i class="material-icons right">send</i>
+		</button>
+	</form>
+</div>
+{% endblock %}
