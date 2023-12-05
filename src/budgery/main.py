@@ -610,6 +610,8 @@ async def process_budget_get(
 	db_user = crud.user_get_by_username(db, user.username)
 	budget = crud.budget_get_by_id(db, budget_id)
 	transaction = crud.transaction_get_one(db, budget.start_date, budget.end_date, None)
+	if transaction is None:
+		return RedirectResponse(status_code=303, url="/process")
 	account = crud.account_get_by_id(db, transaction.account_id_to or transaction.account_id_from)
 	institution = account.institution
 	categories = crud.transaction_get_categories(db)
