@@ -29,14 +29,15 @@ templates.env.filters["currency"] = custom_filters.currency
 async def lifespan(app: FastAPI):
 	LOGGER.info("Adding base config")
 	config = get_config()
-	oauth = get_oauth()
-	oauth.register(
-		name="oidc",
-		server_metadata_url=config("OIDC_METADATA_URL"),
-		client_kwargs={
-			"scope": "openid email profile"
-		}
-	)
+	if config.get("OIDC_METADATA_URL", default=None):
+		oauth = get_oauth()
+		oauth.register(
+			name="oidc",
+			server_metadata_url=config("OIDC_METADATA_URL"),
+			client_kwargs={
+				"scope": "openid email profile"
+			}
+		)
 	app.mount("/static", StaticFiles(directory="static"), name="static")
 	yield
 
@@ -393,10 +394,31 @@ async def category_list_get(
 		"user": user})
 
 @app.get("/login")
-async def login(request: Request):
-	oauth = get_oauth()
-	redirect_uri = request.url_for("auth")
-	return await oauth.oidc.authorize_redirect(request, redirect_uri)
+async def login(
+		request: Request,
+		db: Annotated[Session, Depends(get_db)],
+		config: Annotated[Config, Depends(get_config)],
+	):
+	if config.get("OIDC_CLIENT_ID", default=None):
+		oauth = get_oauth()
+		redirect_uri = request.url_for("auth")
+		return await oauth.oidc.authorize_redirect(request, redirect_uri)
+	else:
+		user = {
+			"auth_time": datetime.datetime.utcnow().isoformat(),
+			"email": "webmaster@localhost",
+			"email_verified": False,
+			"exp": (datetime.datetime.utcnow() + datetime.timedelta(days=360)).isoformat(),
+			"family_name": "Keen",
+			"given_name": "Cmdr",
+			"name": "A developer",
+			"preferred_username": "developer",
+		}
+		user_model = _parse_user(user)
+		crud.user_ensure_exists(db, user_model)
+		request.session["user"] = user
+		return RedirectResponse(url="/")
+
 
 @app.get("/logout")
 async def logout(request: Request):
