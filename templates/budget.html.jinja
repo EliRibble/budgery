@@ -25,7 +25,7 @@ var instances = M.FloatingActionButton.init(elems, {});
 
 <table>
 	<tbody>
-		<tr><td>Net</td><td>{{ color_net_amount(net) }}</td></tr>
+		<tr><td>Net</td><td>{{ color_net_amount(report.net) }}</td></tr>
 	</tbody>
 </table>
 {% for category in categories %}
@@ -41,5 +41,23 @@ var instances = M.FloatingActionButton.init(elems, {});
 		</a>
 	{% endfor %}
 {% endfor %}
+<ul>
+{% for category_report in report.entries_by_category %}
+	<li>{{ category_report.category }}: {{ category_report.net }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+{% if report.unbudgeted_transactions %}
+	<h2>Unbudgeted Transactions</h2>
+	{% for unbudgeted_report in report.unbudgeted_transactions %}
+		<h3>{{ unbudgeted_report.category }}</h3>
+		<table>
+				{% for transaction in unbudgeted_report.transactions %}
+						<tr>
+								<td>{{transaction.description}}</td>
+						</tr>
+				{% endfor %}
+		</table>
+	{% endfor %}
 {% endif %}
 {% endblock %}

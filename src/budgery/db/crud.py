@@ -283,6 +283,18 @@ def transaction_list(db: Session,
 	
 	return query.all()
 
+def transaction_list_between_dates(
+		db: Session,
+		end_date: datetime.date,
+		start_date: datetime.date,
+	):
+	query = (db.query(models.Transaction)
+		.order_by(models.Transaction.at.desc())
+		.filter(models.Transaction.at>start_date)
+		.filter(models.Transaction.at<end_date)
+	)
+	return query.all()
+
 def transaction_list_by_import_job(
 		db: Session,
 		import_job_id: int,

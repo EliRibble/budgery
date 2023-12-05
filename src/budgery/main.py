@@ -1,4 +1,5 @@
 import calendar
+import collections
 from contextlib import asynccontextmanager
 import datetime
 from functools import lru_cache
@@ -15,7 +16,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 from starlette.routing import Route
 
-from budgery import custom_filters, dates, task, util
+from budgery import budget, custom_filters, dates, task, util
 from budgery.db import crud, models
 from budgery.db.connection import connect, Engine, session, Session
 from budgery.user import User
@@ -381,26 +382,20 @@ async def budget_get(
 		db: Annotated[Session, Depends(get_db)],
 		user: Annotated[User, Depends(get_user)]):
 	db_user = crud.user_get_by_username(db, user.username)
-	budget = crud.budget_get_by_id(db, budget_id)
-	entries = crud.budget_entry_list_by_budget(db, budget)
-	categories = set(entry.category for entry in entries)
-	entries_by_category = {category:[] for category in categories}
-	for entry in entries:
-		entries_by_category[entry.category].append(entry)
-	amount_by_category = {
-		category: sum(entry.amount for entry in entries_by_category[category])
-		for category in categories}
-		
+	budget_ = crud.budget_get_by_id(db, budget_id)
+	entries = crud.budget_entry_list_by_budget(db, budget_)
+	transactions = crud.transaction_list_between_dates(
+		db=db,
+		end_date=budget_.end_date,
+		start_date=budget_.start_date,
+	)
 	history = crud.budget_history_list_by_budget_id(db, budget_id)
-	net = sum(entry.amount for entry in entries)
+	report = budget.budget_report(entries, transactions)
 	return templates.TemplateResponse("budget.html.jinja", {
-		"amount_by_category": amount_by_category,
-		"budget": budget,
-		"categories": sorted(categories),
+		"budget": budget_,
 		"current_page": "budget",
-		"entries_by_category": entries_by_category,
 		"history": history,
-		"net": net,
+		"report": report,
 		"request": request,
 		"user": user})
 
