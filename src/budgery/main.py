@@ -16,7 +16,7 @@ from starlette.responses import RedirectResponse
 from starlette.routing import Route
 
 from budgery import custom_filters, dates, task, util
-from budgery.db import crud
+from budgery.db import crud, models
 from budgery.db.connection import connect, Engine, session, Session
 from budgery.user import User
 
@@ -72,6 +72,15 @@ def get_user(request: Request) -> Optional[User]:
 	if user_data is None:
 		return None
 	return _parse_user(user_data)
+
+def get_db_user(
+		request: Request,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[Session, Depends(get_user)],
+	) -> Optional[models.User]:
+	if not user:
+		return None
+	return crud.user_get_by_username(db, user.username)
 
 def _parse_user(user_data: Mapping[str, Union[int, str]]) -> User:
 	user_model = User(
@@ -259,6 +268,40 @@ async def budget_create_post(
 		end_date = end_date,
 		start_date = start_date,
 		user = db_user)
+	return RedirectResponse(status_code=303, url=f"/budget")
+	
+@app.get("/budget/create/monthly")
+async def budget_create_monthly_get(
+		request: Request,
+		db: Annotated[Session, Depends(get_db)],
+		user: Annotated[User, Depends(get_user)]):
+	return templates.TemplateResponse("budget-create-monthly.html.jinja", {
+		"request": request,
+		 "user": user})
+
+@app.post("/budget/create/monthly")
+async def budget_create_monthly_post(
+		request: Request,
+		db: Annotated[Session, Depends(get_db)],
+		db_user: Annotated[User, Depends(get_db_user)]):
+	today = datetime.date.today()
+	for i in range(1, 13):
+		print(i)
+		start_date = datetime.date(
+			day=1,
+			month=i,
+			year=today.year,
+		)
+		end_date = datetime.date(
+			day=1,
+			month=i+1 if i <= 11 else 1,
+			year=today.year if i <= 11 else today.year+1,
+		)
+		budget = crud.budget_create(
+			db = db,
+			end_date = end_date,
+			start_date = start_date,
+			user = db_user)
 	return RedirectResponse(status_code=303, url=f"/budget")
 	
 @app.get("/budget/{budget_id}/entry/create")

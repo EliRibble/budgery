@@ -1,0 +1,19 @@
+{% extends "base.html.jinja" %}
+{% set breadcrumbs = [
+	("/budget", "Budget"),
+	("/budget/create", "Create"),
+	("/budget/create/monthly", "Monthly"),
+] %}
+{% block header %}
+{% include "fragments/breadcrumb.html.jinja" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<form class="col s12" action="/budget/create/monthly" method="POST">
+		<button class="btn waves-effect waves-light" type="submit">Do It!
+			<i class="material-icons right">send</i>
+		</button>
+	</form>
+</div>
+{% endblock %}
