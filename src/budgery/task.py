@@ -7,11 +7,11 @@ from typing import IO, List
 
 import magic
 
+from budgery import infer
 from budgery.dataclasses import ImportRow
 from budgery.db import crud, models
-from budgery.user import User
-import budgery.csv
 import budgery.xlsx
+from budgery.user import User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,3 +71,9 @@ async def process_transaction_upload(
 			sourcink_to=sourcink_unknown,
 		)
 	crud.import_job_finish(db, import_job)
+
+async def train_transaction_categorizor(
+		db: crud.Session,
+		user: User,
+	) -> None:
+	await infer.train_transaction_categorizor(db, user)

@@ -16,7 +16,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 from starlette.routing import Route
 
-from budgery import budget, custom_filters, dates, task, util
+from budgery import budget, custom_filters, dates, infer, task, util
 from budgery.db import crud, models
 from budgery.db.connection import connect, Engine, session, Session
 from budgery.user import User
@@ -577,11 +577,17 @@ async def institution_create_post(
 @app.get("/process")
 async def process_get(
 		request: Request,
+		background_tasks: BackgroundTasks,
 		db: Annotated[Session, Depends(get_db)],
 		user: Annotated[User, Depends(get_user)],
 	):
 	db_user = crud.user_get_by_username(db, user.username)
 	budgets = db_user.budgets
+	background_tasks.add_task(
+		task.train_transaction_categorizor,
+		db=db,
+		user=db_user,
+	)
 	sorted_budgets = sorted(budgets, key=lambda b: b.start_date, reverse=True)
 	transactions = crud.transaction_list(
 		db=db,
@@ -607,6 +613,7 @@ async def process_budget_get(
 	transaction = crud.transaction_get_one(db, budget.start_date, budget.end_date, None)
 	if transaction is None:
 		return RedirectResponse(status_code=303, url="/process")
+	category = infer.transaction_category(transaction)
 	account = crud.account_get_by_id(db, transaction.account_id_to or transaction.account_id_from)
 	institution = account.institution
 	categories = crud.transaction_get_categories(db)
@@ -616,6 +623,7 @@ async def process_budget_get(
 		"categories": categories,
 		"institution": institution,
 		"request": request,
+		"suggested_category": category,
 		"transaction": transaction,
 		"user": user})
 
