@@ -304,6 +304,14 @@ def transaction_list_by_import_job(
 	query = db.query(models.Transaction).order_by(models.Transaction.at.desc()).filter_by(import_job_id=import_job_id)
 	return query.all()
 
+def transaction_list_with_category(
+		db: Session,
+	):
+	query = (db.query(models.Transaction)
+		.filter(models.Transaction.category!=None)
+		.order_by(models.Transaction.at.desc()))
+	return query.all()
+
 def transaction_update(
 		db: Session,
 		transaction: models.Transaction,
