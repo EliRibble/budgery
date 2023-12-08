@@ -269,6 +269,7 @@ def transaction_get_one(
 def transaction_list(db: Session,
 		category: Optional[str] = None,
 		at: Optional[DatetimeRange] = None,
+		limit: Optional[int] = None,
 	):
 	query = db.query(models.Transaction).order_by(models.Transaction.at.desc())
 	if category == "None":
@@ -280,7 +281,8 @@ def transaction_list(db: Session,
 			query = query.filter(models.Transaction.at <= at.end)
 		if at.start:
 			query = query.filter(models.Transaction.at >= at.start)
-	
+	if limit:
+		query = query.limit(limit)
 	return query.all()
 
 def transaction_list_between_dates(
